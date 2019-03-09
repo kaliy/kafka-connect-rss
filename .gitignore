@@ -1,0 +1,16 @@
+# Maven
+target/
+
+# Intellij
+.idea/
+**/*.iml
+
+# Eclipse
+.project
+.settings/
+.cache-main
+.cache-tests
+.classpath
+
+# OSX
+.DS_Store
