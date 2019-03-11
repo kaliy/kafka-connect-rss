@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_SCHEMA;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_TITLE_FIELD;
@@ -49,7 +48,7 @@ public class RssSourceTask extends SourceTask {
                 .put(FEED_TITLE_FIELD, "title field");
         return new Struct(VALUE_SCHEMA)
                 .put(ITEM_FEED_FIELD, feedStruct)
-                .put(ITEM_TITLE_FIELD, UUID.randomUUID().toString());
+                .put(ITEM_TITLE_FIELD, "item_title");
     }
 
     private Map<String, String> sourcePartition() {

@@ -1,0 +1,7 @@
+{
+  "feed": {
+    "title": "title field",
+    "url": "http://feed.rutracker.cc/atom/f/0.atom"
+  },
+  "title": "item_title"
+}
