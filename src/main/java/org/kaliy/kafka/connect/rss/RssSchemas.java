@@ -11,6 +11,8 @@ public class RssSchemas {
     public static final String FEED_URL_FIELD = "url";
 
     public static final String ITEM_TITLE_FIELD = "title";
+    public static final String ITEM_ID_FIELD = "id";
+    public static final String ITEM_CONTENT_FIELD = "content";
     public static final String ITEM_FEED_FIELD = "feed";
 
     public static final Schema FEED_SCHEMA = SchemaBuilder.struct().name(SCHEMA_VALUE_FEED)
@@ -23,5 +25,7 @@ public class RssSchemas {
             .version(1)
             .field(ITEM_FEED_FIELD, FEED_SCHEMA)
             .field(ITEM_TITLE_FIELD, Schema.STRING_SCHEMA)
+            .field(ITEM_ID_FIELD, Schema.STRING_SCHEMA)
+            .field(ITEM_CONTENT_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 }

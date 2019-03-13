@@ -95,6 +95,7 @@
                     <excludes>
                         <exclude>*IntegrationTest.java</exclude>
                     </excludes>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
         </plugins>
@@ -102,6 +103,7 @@
 
     <properties>
         <kafka.version>2.1.1</kafka.version>
+        <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>

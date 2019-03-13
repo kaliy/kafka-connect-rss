@@ -40,10 +40,8 @@
             <link>http://www.oreilly.com/example/001.html</link>
             <description>This is the first item.</description>
             <source url="http://www.anothersite.com/index.xml">Another Site</source>
-            <enclosure url="http://www.oreilly.com/001.mp3" length="54321" type"audio/mpeg"/>
-            <category domain="http://www.dmoz.org">Business/Industries/Publishing/Publishers/
-                Nonfiction/
-            </category>
+            <enclosure url="http://www.oreilly.com/001.mp3" length="54321" type="audio/mpeg"/>
+            <category domain="http://www.dmoz.org">Business/Industries/Publishing/Publishers/Nonfiction/</category>
         </item>
 
         <item>
@@ -51,10 +49,8 @@
             <link>http://www.oreilly.com/example/002.html</link>
             <description>This is the second item.</description>
             <source url="http://www.anothersite.com/index.xml">Another Site</source>
-            <enclosure url="http://www.oreilly.com/002.mp3" length="54321" type"audio/mpeg"/>
-            <category domain="http://www.dmoz.org">
-                Business/Industries/Publishing/Publishers/Nonfiction/
-            </category>
+            <enclosure url="http://www.oreilly.com/002.mp3" length="54321" type="audio/mpeg"/>
+            <category domain="http://www.dmoz.org">Business/Industries/Publishing/Publishers/Nonfiction/</category>
         </item>
     </channel>
 </rss>

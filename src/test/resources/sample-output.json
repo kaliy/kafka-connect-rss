@@ -3,5 +3,7 @@
     "title": "title field",
     "url": "http://feed.rutracker.cc/atom/f/0.atom"
   },
-  "title": "item_title"
+  "title": "item_title",
+  "id": "item_id",
+  "content": "item_content"
 }

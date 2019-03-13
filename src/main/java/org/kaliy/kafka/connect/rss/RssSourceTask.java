@@ -12,7 +12,9 @@ import java.util.Map;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_SCHEMA;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_TITLE_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_URL_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_CONTENT_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_FEED_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_ID_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_TITLE_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.VALUE_SCHEMA;
 
@@ -48,7 +50,9 @@ public class RssSourceTask extends SourceTask {
                 .put(FEED_TITLE_FIELD, "title field");
         return new Struct(VALUE_SCHEMA)
                 .put(ITEM_FEED_FIELD, feedStruct)
-                .put(ITEM_TITLE_FIELD, "item_title");
+                .put(ITEM_TITLE_FIELD, "item_title")
+                .put(ITEM_ID_FIELD, "item_id")
+                .put(ITEM_CONTENT_FIELD, "item_content");
     }
 
     private Map<String, String> sourcePartition() {

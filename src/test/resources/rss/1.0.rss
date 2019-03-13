@@ -23,6 +23,7 @@
     <item rdf:about="http://c.moreover.com/click/here.pl?r123">
         <title>XML: A Disruptive Technology</title>
         <link>http://c.moreover.com/click/here.pl?r123</link>
+        <description>Some sample description</description>
         <cc:license rdf:resource="http://www.creativecommons.org/licenses/example2"/>
     </item>
 </rdf:RDF>
