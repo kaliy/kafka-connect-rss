@@ -46,3 +46,27 @@ Thread.sleep() is an awful way to achieve this, I need to investigate further. W
             }
 ~~~~ 
 shouldPause() is checking for `this.targetState == TargetState.PAUSED`, maybe we can utilize it somehow if that's not internal kafka connect functionality.
+
+## Preventing reprocessing of the same item in feed
+
+When we read a feed again, some or all of the items there may be already processed by previous poll. To prevent them from being sent twice, we need to store information about previously sent items in the offsets. We may implement it with following approaches:
+- serialize the whole item into base64 string (`SyndFeedImpl.toString()` -> base64 or `serialize(SyndFeed)` -> base64) and store last sent items in offs
+  - \+ allows you to resend messages that were updated but has the same ID
+  - \- depends on the implementation and may break and resend messages after updating ROME library
+  - \- will resend the message even if some minor field that is not present in output message has been changed
+  - \- offsets may be huge (that's not really a problem though - see Offsets and message sending section of this document)
+- store list of IDs (which is id in Atom and _(it's complicated as no field is mandatory in RSS)_ in RSS)
+  - \+ offsets are compact
+  - \+/- it's tricky to extract ID from RSS feeds as no element in `<item>` is mandatory.
+  - \- if the item will be updated, we won't send a new message
+- serialize the output `Struct` objects:
+  - \+ we can send new messages with updates and we won't send duplicates if some of the fields than are not present in schema were updated
+  - \+ offsets are much more compact comparing to option #1 and still not that big to store
+  - \- we don't need to store schema and the only easy way to get the `Struct.values` is to call `Struct.toString()` which is not guaranteed to be the same in future versions of kafka connect
+  - \- in case of changing the schema all messages will be resent
+  - \- some users may not want to get updates
+- serialize RssData object
+  - \+/- the same pros and cons as in option #3 but we don't need to rely on toString implementation and write our own serialization
+  - \+ if we want, we can even support schema upgrades and we won't resend messages that were already sent but with previous schema
+
+I think the best way would be to implement option #4 and then later implement option #2 as well giving users a possibility to change the behaviour in the configuration.
