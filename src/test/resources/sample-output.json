@@ -5,5 +5,8 @@
   },
   "title": "item_title",
   "id": "item_id",
-  "content": "item_content"
+  "content": "item_content",
+  "link": "item_link",
+  "author": "item_author",
+  "date": "item_date"
 }

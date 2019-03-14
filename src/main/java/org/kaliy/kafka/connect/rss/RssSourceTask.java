@@ -12,9 +12,12 @@ import java.util.Map;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_SCHEMA;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_TITLE_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_URL_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_AUTHOR_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_CONTENT_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_DATE_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_FEED_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_ID_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_LINK_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_TITLE_FIELD;
 import static org.kaliy.kafka.connect.rss.RssSchemas.VALUE_SCHEMA;
 
@@ -52,7 +55,10 @@ public class RssSourceTask extends SourceTask {
                 .put(ITEM_FEED_FIELD, feedStruct)
                 .put(ITEM_TITLE_FIELD, "item_title")
                 .put(ITEM_ID_FIELD, "item_id")
-                .put(ITEM_CONTENT_FIELD, "item_content");
+                .put(ITEM_CONTENT_FIELD, "item_content")
+                .put(ITEM_LINK_FIELD, "item_link")
+                .put(ITEM_AUTHOR_FIELD, "item_author")
+                .put(ITEM_DATE_FIELD, "item_date");
     }
 
     private Map<String, String> sourcePartition() {

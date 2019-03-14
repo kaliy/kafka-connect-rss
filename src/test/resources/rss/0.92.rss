@@ -21,7 +21,7 @@
         <cloud domain="http://www.oreilly.com" port="80" path="/RPC2"
                registerProcedure="pleaseNotify" protocol="xml-rpc"/>
         <image>
-            <title>RSS0.91 Example</title>
+            <title>RSS0.92 Example</title>
             <url>http://www.oreilly.com/example/images/logo.gif</url>
             <link>http://www.oreilly.com/example/index.html</link>
             <width>88</width>
