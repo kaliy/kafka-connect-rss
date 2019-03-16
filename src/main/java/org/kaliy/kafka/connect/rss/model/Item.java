@@ -1,16 +1,30 @@
 package org.kaliy.kafka.connect.rss.model;
 
-import java.nio.charset.StandardCharsets;
+import org.apache.kafka.connect.data.Struct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.StringJoiner;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_SCHEMA;
+import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_TITLE_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_URL_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_AUTHOR_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_CONTENT_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_DATE_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_FEED_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_ID_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_LINK_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_TITLE_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.VALUE_SCHEMA;
 
 public class Item {
 
-    public static final String OFFSET_SEPARATOR = "|";
+    private final static Logger logger = LoggerFactory.getLogger(Item.class);
 
     private final String title;
     private final String link;
@@ -19,8 +33,9 @@ public class Item {
     private final String author;
     private final Instant date;
     private final String offset;
+    private final Feed feed;
 
-    public Item(String title, String link, String id, String content, String author, Instant date, String offset) {
+    public Item(String title, String link, String id, String content, String author, Instant date, String offset, Feed feed) {
         this.title = title;
         this.link = link;
         this.id = id;
@@ -28,7 +43,30 @@ public class Item {
         this.author = author;
         this.date = date;
         this.offset = offset;
+        this.feed = feed;
     }
+
+    public Optional<Struct> toStruct() {
+        try {
+            Struct feedStruct = new Struct(FEED_SCHEMA)
+                    .put(FEED_URL_FIELD, feed.getUrl());
+            feed.getTitle().ifPresent(title -> feedStruct.put(FEED_TITLE_FIELD, title));
+
+            Struct struct = new Struct(VALUE_SCHEMA)
+                    .put(ITEM_FEED_FIELD, feedStruct)
+                    .put(ITEM_LINK_FIELD, link)
+                    .put(ITEM_TITLE_FIELD, title)
+                    .put(ITEM_ID_FIELD, id);
+            getContent().ifPresent(content -> struct.put(ITEM_CONTENT_FIELD, content));
+            getAuthor().ifPresent(author -> struct.put(ITEM_AUTHOR_FIELD, author));
+            getDate().ifPresent(instant -> struct.put(ITEM_DATE_FIELD, instant.toString()));
+            return Optional.of(struct);
+        } catch (Exception e) {
+            logger.info("Unable to create struct for a feed", e);
+            return Optional.empty();
+        }
+    }
+
 
     public String getTitle() {
         return title;
@@ -54,6 +92,10 @@ public class Item {
         return Optional.ofNullable(date);
     }
 
+    public Feed getFeed() {
+        return feed;
+    }
+
     public String getOffset() {
         return offset;
     }
@@ -73,6 +115,7 @@ public class Item {
         private String author;
         private Instant date;
         private String offset;
+        private Feed feed;
 
         public Builder() {
         }
@@ -116,6 +159,11 @@ public class Item {
             return this;
         }
 
+        public Builder withFeed(Feed feed) {
+            this.feed = feed;
+            return this;
+        }
+
         public Builder withItem(Item item) {
             title = item.title;
             link = item.link;
@@ -124,11 +172,12 @@ public class Item {
             author = item.author;
             date = item.date;
             offset = item.offset;
+            feed = item.feed;
             return this;
         }
 
         public Item build() {
-            return new Item(title, link, id, content, author, date, offset);
+            return new Item(title, link, id, content, author, date, offset, feed);
         }
     }
 }

@@ -1,11 +1,12 @@
 package org.kaliy.kafka.connect.rss;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.connect.cli.ConnectStandalone;
@@ -15,18 +16,27 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.awaitility.Awaitility.await;
 
 class RssSourceConnectorIntegrationTest {
     private static Thread connectorThread;
+    private static WireMockServer wireMockServer;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws Exception {
+        wireMockServer = new WireMockServer(8888);
+        wireMockServer.start();
+        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("atom/1.0.atom"))));
         connectorThread = new Thread(() -> {
             try {
                 ConnectStandalone.main(new String[] {
@@ -42,10 +52,15 @@ class RssSourceConnectorIntegrationTest {
     @Test
     void producesStaticMessage() throws IOException {
         Consumer<String, String> consumer = createConsumer();
-        ConsumerRecords<String, String> records =
-                await().atMost(org.awaitility.Duration.ONE_MINUTE)
-                        .until(() -> consumer.poll(Duration.ofSeconds(1)), recs -> recs.count() > 0);
-        assertThatJson(records.iterator().next().value()).isEqualTo(read("sample-output.json"));
+        List<ConsumerRecord> consumerRecords = new ArrayList<>();
+        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+                .until(() -> {
+                    consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
+                    return consumerRecords.size() == 2;
+                });
+        consumerRecords.sort(Comparator.comparing(c -> ((String) c.value())));
+        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/output-1.json"));
+        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-2.json"));
     }
 
     private static Consumer<String, String> createConsumer() {

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,24 +47,27 @@ public class FeedProvider {
         this.itemBuilderFactory = itemBuilderFactory;
     }
 
-    public Optional<Feed> getNewEvents(Collection<String> sentItems) {
+    public List<Item> getNewEvents(Collection<String> sentItems) {
         Optional<SyndFeed> maybeFeed = feedFetcher.apply(url);
         if (!maybeFeed.isPresent()) {
-            return Optional.empty();
+            return Collections.emptyList();
         }
-        SyndFeed feed = maybeFeed.get();
+        SyndFeed syndFeed = maybeFeed.get();
 
-        String feedTitle = trim(feed.getTitle());
+        String feedTitle = trim(syndFeed.getTitle());
         String feedUrl = url.toString();
 
-        List<Item> allItems = feed.getEntries().stream().map(entry ->
+        Feed feed = feedBuilderFactory.get().withUrl(feedUrl).withTitle(feedTitle).build();
+
+        List<Item> allItems = syndFeed.getEntries().stream().map(entry ->
                 itemBuilderFactory.get()
                         .withTitle(trim(entry.getTitle()))
                         .withLink(link(entry))
                         .withId(trim(entry.getUri()))
                         .withContent(null != entry.getDescription() ? trim(entry.getDescription().getValue()) : null)
-                        .withAuthor(author(entry, feed))
+                        .withAuthor(author(entry, syndFeed))
                         .withDate(date(entry))
+                        .withFeed(feed)
                         .build()
         ).collect(Collectors.toList());
 
@@ -72,15 +76,13 @@ public class FeedProvider {
         StringJoiner joiner = new StringJoiner("|");
         stillLeftItems.forEach(joiner::add);
 
-        List<Item> nonSentItems = allItems.stream()
+        return allItems.stream()
                 .filter(item -> !sentItems.contains(item.toBase64()))
                 .map(item -> itemBuilderFactory.get()
                                 .withItem(item)
                                 .withOffset(joiner.add(item.toBase64()).toString())
                                 .build()
                 ).collect(Collectors.toList());
-
-        return Optional.of(feedBuilderFactory.get().withUrl(feedUrl).withTitle(feedTitle).withItems(nonSentItems).build());
     }
 
     private String link(SyndEntry entry) {

@@ -50,18 +50,18 @@ class FeedProviderTest {
     void trimsFeedTitle() throws Exception {
         syndFeed.setTitle("     Pikachu      ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getTitle()).hasValue("Pikachu"));
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getFeed().getTitle()).hasValue("Pikachu"));
     }
 
     @Test
     void returnsEmptyTitleIfItIsNotPresentInFeed() throws Exception {
         syndFeed.setTitle(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getTitle()).isEmpty());
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getFeed().getTitle()).isEmpty());
     }
 
     @Test
@@ -72,31 +72,27 @@ class FeedProviderTest {
                 Item.Builder::anItem
         );
 
-        Optional<Feed> maybeFeed = feedProvider.getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider.getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getUrl()).isEqualTo("http://naruto.uzumaki"));
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getFeed().getUrl()).isEqualTo("http://naruto.uzumaki"));
     }
 
     @Test
     void trimsItemTitle() throws Exception {
         syndEntry.setTitle("     Sasuke      ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo("Sasuke"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo("Sasuke"));
     }
 
     @Test
     void returnsNullAsItemTitleIfItIsNotPresentInItem() throws Exception {
         syndEntry.setTitle(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo(null))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo(null));
     }
 
     @Test
@@ -104,11 +100,9 @@ class FeedProviderTest {
         syndEntry.setLink("    Raichu FTW!   ");
         syndEntry.setLinks(Collections.singletonList(syndLink("sqiurtle")));
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Raichu FTW!"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Raichu FTW!"));
     }
 
     @Test
@@ -116,11 +110,9 @@ class FeedProviderTest {
         syndEntry.setLink(null);
         syndEntry.setLinks(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo(null))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo(null));
     }
 
     @Test
@@ -128,55 +120,45 @@ class FeedProviderTest {
         syndEntry.setLink(null);
         syndEntry.setLinks(Arrays.asList(syndLink("   Leonardo   "), syndLink("Donatello"), syndLink("Raphael"), syndLink("Michelangelo")));
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Leonardo"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Leonardo"));
     }
 
     @Test
     void trimsItemUriAndUsesItAsAnId() throws Exception {
         syndEntry.setUri("     Junpei      ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isEqualTo("Junpei"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isEqualTo("Junpei"));
     }
 
     @Test
     void returnsNullAsItemIdIfUriIsNotPresent() throws Exception {
         syndEntry.setUri(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isNull())
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isNull());
     }
 
     @Test
     void trimsItemDescriptionAndUsesItAsAContent() throws Exception {
         syndEntry.setDescription(syndContent("   I like to move it move it!    "));
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).hasValue("I like to move it move it!"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).hasValue("I like to move it move it!"));
     }
 
     @Test
     void returnsEmptyContentIfItemDescriptionIsNotPresent() throws Exception {
         syndEntry.setDescription(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).isEmpty())
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).isEmpty());
     }
 
     @Test
@@ -186,11 +168,9 @@ class FeedProviderTest {
         syndFeed.setAuthors(Arrays.asList(syndPerson(" Santa "), syndPerson(" Lotus ")));
         syndFeed.setAuthor(" Clover ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Seven, Junpei"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Seven, Junpei"));
     }
 
     @Test
@@ -200,11 +180,9 @@ class FeedProviderTest {
         syndFeed.setAuthors(Arrays.asList(syndPerson(" Santa "), syndPerson(" Lotus ")));
         syndFeed.setAuthor(" Clover ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Snake"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Snake"));
     }
 
     @Test
@@ -214,11 +192,9 @@ class FeedProviderTest {
         syndFeed.setAuthors(Arrays.asList(syndPerson(" Santa "), syndPerson(" Lotus ")));
         syndFeed.setAuthor(" Clover ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Santa, Lotus"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Santa, Lotus"));
     }
 
     @Test
@@ -228,11 +204,9 @@ class FeedProviderTest {
         syndFeed.setAuthors(null);
         syndFeed.setAuthor(" Clover ");
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Clover"))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Clover"));
     }
 
     @Test
@@ -242,11 +216,9 @@ class FeedProviderTest {
         syndFeed.setAuthors(null);
         syndFeed.setAuthor(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).isEmpty())
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).isEmpty());
     }
 
     @Test
@@ -254,11 +226,9 @@ class FeedProviderTest {
         syndEntry.setUpdatedDate(Date.from(Instant.parse("2000-01-01T10:00:01Z")));
         syndEntry.setPublishedDate(Date.from(Instant.parse("2010-11-11T20:00:02Z")));
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2000-01-01T10:00:01Z")))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2000-01-01T10:00:01Z")));
     }
 
     @Test
@@ -266,11 +236,9 @@ class FeedProviderTest {
         //updated date is null by default
         syndEntry.setPublishedDate(Date.from(Instant.parse("2010-11-11T20:00:02Z")));
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2010-11-11T20:00:02Z")))
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2010-11-11T20:00:02Z")));
     }
 
     @Test
@@ -278,11 +246,9 @@ class FeedProviderTest {
         //updated date is null by default
         syndEntry.setPublishedDate(null);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
-                .hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).isEmpty())
-        );
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).isEmpty());
     }
 
     @Test
@@ -291,9 +257,9 @@ class FeedProviderTest {
         when(item.toBase64()).thenReturn("offset1");
         when(spyItemBuilder.build()).thenReturn(item);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.singleton("offset1"));
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.singleton("offset1"));
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).isEmpty());
+        assertThat(items).isEmpty();
     }
 
     @Test
@@ -303,9 +269,9 @@ class FeedProviderTest {
         ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
         when(spyItemBuilder.build()).thenReturn(item);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.singleton("offset1"));
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.singleton("offset1"));
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(1));
+        assertThat(items).hasSize(1);
         verify(spyItemBuilder).withOffset(offsetCaptor.capture());
         assertThat(offsetCaptor.getAllValues()).containsOnly("offset2");
     }
@@ -322,9 +288,9 @@ class FeedProviderTest {
         ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
         when(spyItemBuilder.build()).thenReturn(item).thenReturn(item2).thenReturn(item3);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry, syndEntry))).getNewEvents(Collections.emptySet());
+        List<Item> items = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry, syndEntry))).getNewEvents(Collections.emptySet());
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(3));
+        assertThat(items).hasSize(3);
         verify(spyItemBuilder, times(3)).withOffset(offsetCaptor.capture());
         assertThat(offsetCaptor.getAllValues()).containsExactly("offset1", "offset1|offset2", "offset1|offset2|offset3");
     }
@@ -339,9 +305,9 @@ class FeedProviderTest {
         ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
         when(spyItemBuilder.build()).thenReturn(item).thenReturn(item2);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry))).getNewEvents(Collections.singletonList("offset1"));
+        List<Item> items = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry))).getNewEvents(Collections.singletonList("offset1"));
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(1));
+        assertThat(items).hasSize(1);
         verify(spyItemBuilder, times(1)).withOffset(offsetCaptor.capture());
         assertThat(offsetCaptor.getAllValues()).containsExactly("offset1|offset2");
     }
@@ -358,10 +324,10 @@ class FeedProviderTest {
         ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
         when(spyItemBuilder.build()).thenReturn(item).thenReturn(item2).thenReturn(item3);
 
-        Optional<Feed> maybeFeed = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry, syndEntry)))
+        List<Item> items = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry, syndEntry)))
                 .getNewEvents(Arrays.asList("offset0", "offset2"));
 
-        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(2));
+        assertThat(items).hasSize(2);
         verify(spyItemBuilder, times(2)).withOffset(offsetCaptor.capture());
         assertThat(offsetCaptor.getAllValues()).containsExactly("offset2|offset1", "offset2|offset1|offset3");
     }

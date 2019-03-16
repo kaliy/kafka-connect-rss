@@ -1,0 +1,12 @@
+{
+  "feed": {
+    "title": "Общая по всем разделам",
+    "url": "http://localhost:8888/feed.atom"
+  },
+  "title": "Истории академии Ядзикита / Yajikita Gakuen Douchuuki / Tales of Yajikita College [OVA] [2 из 2] [Без хардсаба] [JAP+SUB] [1989, приключения, боевые искусства, DVDRip] [924 MB]",
+  "id": "tag:rto.feed,2019-03-09:/t/5701301",
+  "link": "https://rutracker.org/forum/viewtopic.php?t=5701301",
+  "content": "Some sample content which is not present in a real feed but added here for testing purposes",
+  "author": "sergeandr",
+  "date": "2019-03-09T10:42:36Z"
+}
