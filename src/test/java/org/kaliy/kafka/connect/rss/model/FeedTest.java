@@ -1,16 +1,25 @@
-package org.kaliy.kafka.connect.rss;
+package org.kaliy.kafka.connect.rss.model;
 
 import org.apache.kafka.connect.data.Struct;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.kaliy.kafka.connect.rss.RssSchemas.*;
+import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_TITLE_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.FEED_URL_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_AUTHOR_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_CONTENT_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_DATE_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_FEED_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_ID_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_LINK_FIELD;
+import static org.kaliy.kafka.connect.rss.RssSchemas.ITEM_TITLE_FIELD;
 
 class FeedTest {
 
@@ -22,10 +31,11 @@ class FeedTest {
     private static final Instant DATE = Instant.ofEpochMilli(11000);
     private static final String FEED_TITLE = "feed_title";
     private static final String FEED_URL = "feed_url";
+    private static final String OFFSET = "offset";
 
     @Test
     void serializesFeedToStructWithAllFields() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -49,7 +59,7 @@ class FeedTest {
 
     @Test
     void serializesMultipleItemsIntoMultipleStructs() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Arrays.asList(item, item, item));
 
         List<Struct> structs = feed.toStruct();
@@ -59,8 +69,8 @@ class FeedTest {
 
     @Test
     void skipsInvalidItems() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE);
-        Feed.Item invalidItem = new Feed.Item(null, null, null, null, null, null);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE, OFFSET);
+        Item invalidItem = new Item(null, null, null, null, null, null, null);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Arrays.asList(invalidItem, item));
 
         List<Struct> structs = feed.toStruct();
@@ -70,7 +80,7 @@ class FeedTest {
 
     @Test
     void toStructDoesNotIncludeFeedWithoutUrl() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(null, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -80,7 +90,7 @@ class FeedTest {
 
     @Test
     void toStructIncludesFeedWithoutTitle() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, null, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -90,7 +100,7 @@ class FeedTest {
 
     @Test
     void toStructDoesNotIncludeItemsWithoutTitle() {
-        Feed.Item item = new Feed.Item(null, LINK, ID, CONTENT, AUTHOR, DATE);
+        Item item = new Item(null, LINK, ID, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -100,18 +110,17 @@ class FeedTest {
 
     @Test
     void toStructDoesNotIncludeItemWithoutLink() {
-        Feed.Item item = new Feed.Item(TITLE, null, ID, CONTENT, AUTHOR, DATE);
+        Item item = new Item(TITLE, null, ID, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
 
         assertThat(structs).isEmpty();
     }
-
 
     @Test
     void toStructDoesNotIncludeItemsWithoutId() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, null, CONTENT, AUTHOR, DATE);
+        Item item = new Item(TITLE, LINK, null, CONTENT, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -119,10 +128,9 @@ class FeedTest {
         assertThat(structs).isEmpty();
     }
 
-
     @Test
     void toStructIncludesItemsWithoutContent() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, null, AUTHOR, DATE);
+        Item item = new Item(TITLE, LINK, ID, null, AUTHOR, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -132,7 +140,7 @@ class FeedTest {
 
     @Test
     void toStructIncludesItemsWithoutAuthor() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, null, DATE);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, null, DATE, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();
@@ -142,7 +150,7 @@ class FeedTest {
 
     @Test
     void toStructIncludesItemsWithoutDate() {
-        Feed.Item item = new Feed.Item(TITLE, LINK, ID, CONTENT, AUTHOR, null);
+        Item item = new Item(TITLE, LINK, ID, CONTENT, AUTHOR, null, OFFSET);
         Feed feed = new Feed(FEED_URL, FEED_TITLE, Collections.singletonList(item));
 
         List<Struct> structs = feed.toStruct();

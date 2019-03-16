@@ -7,6 +7,8 @@ import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import com.rometools.utils.Strings;
 
+import org.kaliy.kafka.connect.rss.model.Feed;
+import org.kaliy.kafka.connect.rss.model.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,10 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class FeedProvider {
@@ -22,34 +28,59 @@ public class FeedProvider {
     private static final Logger logger = LoggerFactory.getLogger(FeedProvider.class);
 
     private final URL url;
+    private final Function<URL, Optional<SyndFeed>> feedFetcher;
+    private final Supplier<Feed.Builder> feedBuilderFactory;
+    private final Supplier<Item.Builder> itemBuilderFactory;
 
     public FeedProvider(URL url) {
+        this(url, feedFetcher(url), Feed.Builder::aFeed, Item.Builder::anItem);
+    }
+
+    public FeedProvider(URL url,
+                        Function<URL, Optional<SyndFeed>> feedFetcher,
+                        Supplier<Feed.Builder> feedBuilderFactory,
+                        Supplier<Item.Builder> itemBuilderFactory) {
         this.url = url;
+        this.feedFetcher = feedFetcher;
+        this.feedBuilderFactory = feedBuilderFactory;
+        this.itemBuilderFactory = itemBuilderFactory;
     }
 
     public Optional<Feed> getNewEvents(Collection<String> sentItems) {
-        SyndFeed feed;
-        try {
-            SyndFeedInput input = new SyndFeedInput();
-            feed = input.build(new XmlReader(url));
-        } catch (Exception e) {
-            logger.warn("Unable to process feed from {}", url, e);
+        Optional<SyndFeed> maybeFeed = feedFetcher.apply(url);
+        if (!maybeFeed.isPresent()) {
             return Optional.empty();
         }
+        SyndFeed feed = maybeFeed.get();
 
         String feedTitle = trim(feed.getTitle());
         String feedUrl = url.toString();
 
-        List<Feed.Item> items = feed.getEntries().stream().map(entry -> new Feed.Item(
-                trim(entry.getTitle()),
-                link(entry),
-                trim(entry.getUri()),
-                null != entry.getDescription() ? trim(entry.getDescription().getValue()) : null,
-                author(entry, feed),
-                date(entry)
-        )).collect(Collectors.toList());
+        List<Item> allItems = feed.getEntries().stream().map(entry ->
+                itemBuilderFactory.get()
+                        .withTitle(trim(entry.getTitle()))
+                        .withLink(link(entry))
+                        .withId(trim(entry.getUri()))
+                        .withContent(null != entry.getDescription() ? trim(entry.getDescription().getValue()) : null)
+                        .withAuthor(author(entry, feed))
+                        .withDate(date(entry))
+                        .build()
+        ).collect(Collectors.toList());
 
-        return Optional.of(new Feed(feedUrl, feedTitle, items));
+        Set<String> stillLeftItems = allItems.stream().map(Item::toBase64)
+                .filter(sentItems::contains).collect(Collectors.toSet());
+        StringJoiner joiner = new StringJoiner("|");
+        stillLeftItems.forEach(joiner::add);
+
+        List<Item> nonSentItems = allItems.stream()
+                .filter(item -> !sentItems.contains(item.toBase64()))
+                .map(item -> itemBuilderFactory.get()
+                                .withItem(item)
+                                .withOffset(joiner.add(item.toBase64()).toString())
+                                .build()
+                ).collect(Collectors.toList());
+
+        return Optional.of(feedBuilderFactory.get().withUrl(feedUrl).withTitle(feedTitle).withItems(nonSentItems).build());
     }
 
     private String link(SyndEntry entry) {
@@ -78,7 +109,7 @@ public class FeedProvider {
     }
 
     private String authors(List<SyndPerson> authors) {
-        return authors.stream().map(SyndPerson::getName).collect(Collectors.joining(", "));
+        return authors.stream().map(SyndPerson::getName).map(String::trim).collect(Collectors.joining(", "));
     }
 
     private Instant date(SyndEntry entry) {
@@ -92,5 +123,17 @@ public class FeedProvider {
 
     private String trim(String string) {
         return null == string ? null : string.trim();
+    }
+
+    private static Function<URL, Optional<SyndFeed>> feedFetcher(URL url) {
+        return (u) -> {
+            try {
+                SyndFeedInput input = new SyndFeedInput();
+                return Optional.of(input.build(new XmlReader(url)));
+            } catch (Exception e) {
+                logger.warn("Unable to process feed from {}", url, e);
+                return Optional.empty();
+            }
+        };
     }
 }

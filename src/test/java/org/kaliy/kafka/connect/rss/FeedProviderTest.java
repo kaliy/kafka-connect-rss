@@ -1,155 +1,413 @@
 package org.kaliy.kafka.connect.rss;
 
-import org.junit.jupiter.api.Test;
+import com.rometools.rome.feed.synd.SyndContentImpl;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndEntryImpl;
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.feed.synd.SyndFeedImpl;
+import com.rometools.rome.feed.synd.SyndLinkImpl;
+import com.rometools.rome.feed.synd.SyndPersonImpl;
 
+import org.junit.jupiter.api.Test;
+import org.kaliy.kafka.connect.rss.model.Feed;
+import org.kaliy.kafka.connect.rss.model.Item;
+import org.mockito.ArgumentCaptor;
+
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class FeedProviderTest {
 
+    private SyndEntryImpl syndEntry = syndEntry();
+    private SyndFeedImpl syndFeed = syndFeed(Collections.singletonList(syndEntry));
+    private Item.Builder spyItemBuilder = spy(Item.Builder.class);
+
     @Test
-    void parsesAtom_0_3() {
-        FeedProvider provider = new FeedProvider(url("atom/0.3.atom"));
+    void returnsEmptyOptionalIfFetchIsUnsuccessful() throws Exception {
+        FeedProvider feedProvider = new FeedProvider(new URL("http://random.host"),
+                (url) -> Optional.empty(),
+                Feed.Builder::aFeed,
+                () -> spyItemBuilder
+        );
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
-
-        assertThat(data).isPresent();
-        Feed rss = data.get();
-        assertThat(rss.getItems()).hasSize(1);
-        Feed.Item item = rss.getItems().get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(rss.getUrl()).endsWith("atom/0.3.atom");
-            softly.assertThat(rss.getTitle()).hasValue("The name of your data feed");
-            softly.assertThat(item.getTitle()).isEqualTo("Red wool sweater");
-            softly.assertThat(item.getContent()).hasValue("Comfortable and soft, this sweater will keep you warm on those cold winter nights.");
-            softly.assertThat(item.getId()).isEqualTo("tag:google.com,2005-10-15:/support/products");
-            softly.assertThat(item.getLink()).isEqualTo("http://www.example.com/item1-info-page.html");
-            softly.assertThat(item.getAuthor()).hasValue("Google");
-            softly.assertThat(item.getDate()).isPresent().hasValueSatisfying(d -> assertThat(d).isEqualTo("2005-10-13T18:30:02Z"));
-        });
+        assertThat(feedProvider.getNewEvents(Collections.emptySet())).isEmpty();
     }
 
     @Test
-    void parsesAtom_1_0() {
-        FeedProvider provider = new FeedProvider(url("atom/1.0.atom"));
+    void trimsFeedTitle() throws Exception {
+        syndFeed.setTitle("     Pikachu      ");
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(data).isPresent();
-        Feed rss = data.get();
-        assertThat(rss.getItems()).hasSize(2);
-        Feed.Item item = rss.getItems().get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(rss.getUrl()).endsWith("atom/1.0.atom");
-            softly.assertThat(rss.getTitle()).hasValue("Общая по всем разделам");
-            softly.assertThat(item.getTitle()).isEqualTo("Истории академии Ядзикита / Yajikita Gakuen Douchuuki / Tales of Yajikita College [OVA] [2 из 2] [Без хардсаба] [JAP+SUB] [1989, приключения, боевые искусства, DVDRip] [924 MB]");
-            softly.assertThat(item.getContent()).hasValue("Some sample content which is not present in a real feed but added here for testing purposes");
-            softly.assertThat(item.getId()).isEqualTo("tag:rto.feed,2019-03-09:/t/5701301");
-            softly.assertThat(item.getLink()).isEqualTo("https://rutracker.org/forum/viewtopic.php?t=5701301");
-            softly.assertThat(item.getAuthor()).hasValue("sergeandr");
-            softly.assertThat(item.getDate()).isPresent().hasValueSatisfying(d -> assertThat(d).isEqualTo("2019-03-09T10:42:36Z"));
-        });
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getTitle()).hasValue("Pikachu"));
     }
 
     @Test
-    void parsesRss_0_91() {
-        FeedProvider provider = new FeedProvider(url("rss/0.91.rss"));
+    void returnsEmptyTitleIfItIsNotPresentInFeed() throws Exception {
+        syndFeed.setTitle(null);
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(data).isPresent();
-        Feed rss = data.get();
-        assertThat(rss.getItems()).hasSize(3);
-        Feed.Item item = rss.getItems().get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(rss.getUrl()).endsWith("rss/0.91.rss");
-            softly.assertThat(rss.getTitle()).hasValue("RSS0.91 Example");
-            softly.assertThat(item.getTitle()).isEqualTo("The First Item");
-            softly.assertThat(item.getContent()).hasValue("This is the first item.");
-            softly.assertThat(item.getId()).isEqualTo("http://www.oreilly.com/example/001.html");
-            softly.assertThat(item.getLink()).isEqualTo("http://www.oreilly.com/example/001.html");
-            softly.assertThat(item.getAuthor()).hasValue("editor@oreilly.com");
-            softly.assertThat(item.getDate()).isEmpty();
-        });
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getTitle()).isEmpty());
     }
 
     @Test
-    void parsesRss_0_92() {
-        FeedProvider provider = new FeedProvider(url("rss/0.92.rss"));
+    void usesUrlFromTheConstructorAsFeedUrl() throws Exception {
+        FeedProvider feedProvider = new FeedProvider(new URL("http://naruto.uzumaki"),
+                (url) -> Optional.of(syndFeed),
+                Feed.Builder::aFeed,
+                Item.Builder::anItem
+        );
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
+        Optional<Feed> maybeFeed = feedProvider.getNewEvents(Collections.emptyList());
 
-        assertThat(data).isPresent();
-        Feed rss = data.get();
-        assertThat(rss.getItems()).hasSize(2);
-        Feed.Item item = rss.getItems().get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(rss.getUrl()).endsWith("rss/0.92.rss");
-            softly.assertThat(rss.getTitle()).hasValue("RSS0.92 Example");
-            softly.assertThat(item.getTitle()).isEqualTo("The First Item");
-            softly.assertThat(item.getContent()).hasValue("This is the first item.");
-            softly.assertThat(item.getId()).isEqualTo("http://www.oreilly.com/example/001.html");
-            softly.assertThat(item.getLink()).isEqualTo("http://www.oreilly.com/example/001.html");
-            softly.assertThat(item.getAuthor()).hasValue("editor@oreilly.com");
-            softly.assertThat(item.getDate()).isEmpty();
-        });
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getUrl()).isEqualTo("http://naruto.uzumaki"));
     }
 
     @Test
-    void parsesRss_1_0() {
-        FeedProvider provider = new FeedProvider(url("rss/1.0.rss"));
+    void trimsItemTitle() throws Exception {
+        syndEntry.setTitle("     Sasuke      ");
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(data).isPresent();
-        Feed rss = data.get();
-        assertThat(rss.getItems()).hasSize(1);
-        Feed.Item item = rss.getItems().get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(rss.getUrl()).endsWith("rss/1.0.rss");
-            softly.assertThat(rss.getTitle()).hasValue("Meerkat");
-            softly.assertThat(item.getTitle()).isEqualTo("XML: A Disruptive Technology");
-            softly.assertThat(item.getContent()).hasValue("Some sample description");
-            softly.assertThat(item.getId()).isEqualTo("http://c.moreover.com/click/here.pl?r123");
-            softly.assertThat(item.getLink()).isEqualTo("http://c.moreover.com/click/here.pl?r123");
-            softly.assertThat(item.getAuthor()).isEmpty();
-            softly.assertThat(item.getDate()).isEmpty();
-        });
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo("Sasuke"))
+        );
     }
 
     @Test
-    void parsesRss_2_0() {
-        FeedProvider provider = new FeedProvider(url("rss/2.0.rss"));
+    void returnsNullAsItemTitleIfItIsNotPresentInItem() throws Exception {
+        syndEntry.setTitle(null);
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(data).isPresent();
-        Feed rss = data.get();
-        assertThat(rss.getItems()).hasSize(2);
-        Feed.Item item = rss.getItems().get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(rss.getUrl()).endsWith("rss/2.0.rss");
-            softly.assertThat(rss.getTitle()).hasValue("All Torrents :: morethan.tv");
-            softly.assertThat(item.getTitle()).isEqualTo("Best.House.on.the.Block.S01E06.From.Windows.to.Wallpaper.1080p.WEB.x264-CAFFEiNE  - x264 / 1080p / Web-DL");
-            softly.assertThat(item.getContent()).hasValue("This tag was empty in the original feed, it was added only for unit testing purposes");
-            softly.assertThat(item.getId()).isEqualTo("https://www.morethan.tv/torrents.php?action=download&id=437840");
-            softly.assertThat(item.getLink()).isEqualTo("https://www.morethan.tv/torrents.php?action=download&id=437840");
-            softly.assertThat(item.getAuthor()).hasValue("TheShadow");
-            softly.assertThat(item.getDate()).isPresent().hasValueSatisfying(d -> assertThat(d).isEqualTo("2019-03-08T20:01:45Z"));
-        });
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo(null))
+        );
     }
 
     @Test
-    void returnsEmptyResultIfXmlIsInvalid() {
-        FeedProvider provider = new FeedProvider(url("special_cases/invalid.xml"));
+    void trimsAndReturnsItemLinkIfItIsPresent() throws Exception {
+        syndEntry.setLink("    Raichu FTW!   ");
+        syndEntry.setLinks(Collections.singletonList(syndLink("sqiurtle")));
 
-        Optional<Feed> data = provider.getNewEvents(Collections.emptyList());
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(data).isEmpty();
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Raichu FTW!"))
+        );
+    }
+
+    @Test
+    void returnsNullLinkIfItIsNotPresentInEntry() throws Exception {
+        syndEntry.setLink(null);
+        syndEntry.setLinks(null);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo(null))
+        );
+    }
+
+    @Test
+    void trimsAndReturnsFirstLinkInItemIfItIsPresent() throws Exception {
+        syndEntry.setLink(null);
+        syndEntry.setLinks(Arrays.asList(syndLink("   Leonardo   "), syndLink("Donatello"), syndLink("Raphael"), syndLink("Michelangelo")));
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Leonardo"))
+        );
+    }
+
+    @Test
+    void trimsItemUriAndUsesItAsAnId() throws Exception {
+        syndEntry.setUri("     Junpei      ");
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isEqualTo("Junpei"))
+        );
+    }
+
+    @Test
+    void returnsNullAsItemIdIfUriIsNotPresent() throws Exception {
+        syndEntry.setUri(null);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isNull())
+        );
+    }
+
+    @Test
+    void trimsItemDescriptionAndUsesItAsAContent() throws Exception {
+        syndEntry.setDescription(syndContent("   I like to move it move it!    "));
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).hasValue("I like to move it move it!"))
+        );
+    }
+
+    @Test
+    void returnsEmptyContentIfItemDescriptionIsNotPresent() throws Exception {
+        syndEntry.setDescription(null);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).isEmpty())
+        );
+    }
+
+    @Test
+    void combinesAllAvailableAuthorsInItem() throws Exception {
+        syndEntry.setAuthors(Arrays.asList(syndPerson(" Seven "), syndPerson(" Junpei ")));
+        syndEntry.setAuthor(" Snake ");
+        syndFeed.setAuthors(Arrays.asList(syndPerson(" Santa "), syndPerson(" Lotus ")));
+        syndFeed.setAuthor(" Clover ");
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Seven, Junpei"))
+        );
+    }
+
+    @Test
+    void usesItemAuthorIfItemAuthorsListIsNotAvailable() throws Exception {
+        syndEntry.setAuthors(null);
+        syndEntry.setAuthor(" Snake ");
+        syndFeed.setAuthors(Arrays.asList(syndPerson(" Santa "), syndPerson(" Lotus ")));
+        syndFeed.setAuthor(" Clover ");
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Snake"))
+        );
+    }
+
+    @Test
+    void usesFeedAuthorsIfItemDoesNotHaveAuthors() throws Exception {
+        syndEntry.setAuthors(null);
+        syndEntry.setAuthor(null);
+        syndFeed.setAuthors(Arrays.asList(syndPerson(" Santa "), syndPerson(" Lotus ")));
+        syndFeed.setAuthor(" Clover ");
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Santa, Lotus"))
+        );
+    }
+
+    @Test
+    void usesFeedAuthorIfItemDoesNotHaveAuthorsAndFeedAuthorsListIsNotPresent() throws Exception {
+        syndEntry.setAuthors(null);
+        syndEntry.setAuthor(null);
+        syndFeed.setAuthors(null);
+        syndFeed.setAuthor(" Clover ");
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Clover"))
+        );
+    }
+
+    @Test
+    void returnsEmptyAuthorsIfBothItemAndFeedDoNotContainAuthors() throws Exception {
+        syndEntry.setAuthors(null);
+        syndEntry.setAuthor(null);
+        syndFeed.setAuthors(null);
+        syndFeed.setAuthor(null);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).isEmpty())
+        );
+    }
+
+    @Test
+    void usesUpdatedDateAsDateIfItIsAvailable() throws Exception {
+        syndEntry.setUpdatedDate(Date.from(Instant.parse("2000-01-01T10:00:01Z")));
+        syndEntry.setPublishedDate(Date.from(Instant.parse("2010-11-11T20:00:02Z")));
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2000-01-01T10:00:01Z")))
+        );
+    }
+
+    @Test
+    void usesPublishedDateAsDateIfUpdatedDateIsNotPresent() throws Exception {
+        //updated date is null by default
+        syndEntry.setPublishedDate(Date.from(Instant.parse("2010-11-11T20:00:02Z")));
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2010-11-11T20:00:02Z")))
+        );
+    }
+
+    @Test
+    void returnsEmptyDateIfDatesAreNotAvailable() throws Exception {
+        //updated date is null by default
+        syndEntry.setPublishedDate(null);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems())
+                .hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).isEmpty())
+        );
+    }
+
+    @Test
+    void doesNotReturnItemsIfTheyHaveBeenSent() throws Exception {
+        Item item = mock(Item.class);
+        when(item.toBase64()).thenReturn("offset1");
+        when(spyItemBuilder.build()).thenReturn(item);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.singleton("offset1"));
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).isEmpty());
+    }
+
+    @Test
+    void addsItemsWithOffsetsThatHaveNotBeenSent() throws Exception {
+        Item item = mock(Item.class);
+        when(item.toBase64()).thenReturn("offset2");
+        ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
+        when(spyItemBuilder.build()).thenReturn(item);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed).getNewEvents(Collections.singleton("offset1"));
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(1));
+        verify(spyItemBuilder).withOffset(offsetCaptor.capture());
+        assertThat(offsetCaptor.getAllValues()).containsOnly("offset2");
+    }
+
+    @Test
+    void returnsMultipleItemsWithCombinedOffsets() throws Exception {
+        Item item = mock(Item.class);
+        when(item.toBase64()).thenReturn("offset1");
+        Item item2 = mock(Item.class);
+        when(item2.toBase64()).thenReturn("offset2");
+        Item item3 = mock(Item.class);
+        when(item3.toBase64()).thenReturn("offset3");
+
+        ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
+        when(spyItemBuilder.build()).thenReturn(item).thenReturn(item2).thenReturn(item3);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry, syndEntry))).getNewEvents(Collections.emptySet());
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(3));
+        verify(spyItemBuilder, times(3)).withOffset(offsetCaptor.capture());
+        assertThat(offsetCaptor.getAllValues()).containsExactly("offset1", "offset1|offset2", "offset1|offset2|offset3");
+    }
+
+    @Test
+    void doesNotReturnItemsWithOffsetsThatAlreadyWereSentButKeepsOldOffsetsInNewItems() throws Exception {
+        Item item = mock(Item.class);
+        when(item.toBase64()).thenReturn("offset1");
+        Item item2 = mock(Item.class);
+        when(item2.toBase64()).thenReturn("offset2");
+
+        ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
+        when(spyItemBuilder.build()).thenReturn(item).thenReturn(item2);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry))).getNewEvents(Collections.singletonList("offset1"));
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(1));
+        verify(spyItemBuilder, times(1)).withOffset(offsetCaptor.capture());
+        assertThat(offsetCaptor.getAllValues()).containsExactly("offset1|offset2");
+    }
+
+    @Test
+    void ignoresOffsetsOfItemsThatWereNotPresentInNewFeedButLeavesOffsetsOfAlreadySentItemsThatArePresentInFeed() throws Exception {
+        Item item = mock(Item.class);
+        when(item.toBase64()).thenReturn("offset1");
+        Item item2 = mock(Item.class);
+        when(item2.toBase64()).thenReturn("offset2");
+        Item item3 = mock(Item.class);
+        when(item3.toBase64()).thenReturn("offset3");
+
+        ArgumentCaptor<String> offsetCaptor = ArgumentCaptor.forClass(String.class);
+        when(spyItemBuilder.build()).thenReturn(item).thenReturn(item2).thenReturn(item3);
+
+        Optional<Feed> maybeFeed = feedProvider(syndFeed(Arrays.asList(syndEntry, syndEntry, syndEntry)))
+                .getNewEvents(Arrays.asList("offset0", "offset2"));
+
+        assertThat(maybeFeed).hasValueSatisfying(feed -> assertThat(feed.getItems()).hasSize(2));
+        verify(spyItemBuilder, times(2)).withOffset(offsetCaptor.capture());
+        assertThat(offsetCaptor.getAllValues()).containsExactly("offset2|offset1", "offset2|offset1|offset3");
+    }
+
+    private FeedProvider feedProvider(SyndFeed syndFeed) throws MalformedURLException {
+        return new FeedProvider(new URL("http://random.host"),
+                (url) -> Optional.of(syndFeed),
+                Feed.Builder::aFeed,
+                () -> spyItemBuilder
+        );
+    }
+
+    private SyndFeedImpl syndFeed(List<SyndEntry> entries) {
+        SyndFeedImpl feed = new SyndFeedImpl();
+        feed.setTitle("title");
+        feed.setUri("url");
+        feed.setEntries(entries);
+        return feed;
+    }
+
+    private SyndEntryImpl syndEntry() {
+        // we are not populating Author as it won't be overwritten anymore in SyndEntryImpl.setAuthor
+        SyndEntryImpl syndEntry = new SyndEntryImpl();
+        syndEntry.setTitle("title");
+        syndEntry.setLink("link");
+        syndEntry.setUri("uri");
+        syndEntry.setDescription(syndContent("content"));
+        return syndEntry;
+    }
+
+    private SyndContentImpl syndContent(String content) {
+        SyndContentImpl syndContent = new SyndContentImpl();
+        syndContent.setValue(content);
+        return syndContent;
+    }
+
+    private SyndLinkImpl syndLink(String href) {
+        SyndLinkImpl syndLink = new SyndLinkImpl();
+        syndLink.setHref(href);
+        return syndLink;
+    }
+
+    private SyndPersonImpl syndPerson(String name) {
+        SyndPersonImpl syndPerson = new SyndPersonImpl();
+        syndPerson.setName(name);
+        return syndPerson;
     }
 
     private URL url(String file) {

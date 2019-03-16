@@ -1,10 +1,9 @@
-package org.kaliy.kafka.connect.rss;
+package org.kaliy.kafka.connect.rss.model;
 
 import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,48 +34,6 @@ public class Feed {
         this.url = url;
         this.title = title;
         this.items = items;
-    }
-
-    public static class Item {
-        private final String title;
-        private final String link;
-        private final String id;
-        private final String content;
-        private final String author;
-        private final Instant date;
-
-        public Item(String title, String link, String id, String content, String author, Instant date) {
-            this.title = title;
-            this.link = link;
-            this.id = id;
-            this.content = content;
-            this.author = author;
-            this.date = date;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getLink() {
-            return link;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public Optional<String> getContent() {
-            return Optional.ofNullable(content);
-        }
-
-        public Optional<String> getAuthor() {
-            return Optional.ofNullable(author);
-        }
-
-        public Optional<Instant> getDate() {
-            return Optional.ofNullable(date);
-        }
     }
 
     public Optional<String> getTitle() {
@@ -118,5 +75,37 @@ public class Feed {
                 return Stream.empty();
             }
         }).collect(Collectors.toList());
+    }
+
+    public static final class Builder {
+        private String url;
+        private String title;
+        private List<Item> items;
+
+        private Builder() {
+        }
+
+        public static Builder aFeed() {
+            return new Builder();
+        }
+
+        public Builder withUrl(String url) {
+            this.url = url;
+            return this;
+        }
+
+        public Builder withTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder withItems(List<Item> items) {
+            this.items = items;
+            return this;
+        }
+
+        public Feed build() {
+            return new Feed(url, title, items);
+        }
     }
 }
