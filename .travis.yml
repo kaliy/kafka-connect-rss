@@ -11,3 +11,7 @@ script:
 cache:
   directories:
     - $HOME/.m2
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -f target/site/jacoco-ut/jacoco.xml -F unit
+  - bash <(curl -s https://codecov.io/bash) -f target/site/jacoco-it/jacoco.xml -F integration
