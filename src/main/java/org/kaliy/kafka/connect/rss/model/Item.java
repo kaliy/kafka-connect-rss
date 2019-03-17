@@ -25,6 +25,7 @@ import static org.kaliy.kafka.connect.rss.RssSchemas.VALUE_SCHEMA;
 public class Item {
 
     private final static Logger logger = LoggerFactory.getLogger(Item.class);
+    private static final String BASE64_FIELD_DELIMITER = "|";
 
     private final String title;
     private final String link;
@@ -102,7 +103,7 @@ public class Item {
 
     public String toBase64() {
         return Base64.getEncoder().encodeToString(
-                new StringJoiner("|")
+                new StringJoiner(BASE64_FIELD_DELIMITER)
                         .add(title).add(link).add(id).add(content).add(author).toString().getBytes(UTF_8)
         );
     }

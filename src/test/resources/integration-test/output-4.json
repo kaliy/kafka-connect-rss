@@ -58,14 +58,14 @@
   },
   "payload": {
     "feed": {
-      "title": "All Torrents :: morethan.tv",
-      "url": "http://localhost:8888/feed.rss"
+      "title": "Общая по всем разделам",
+      "url": "http://localhost:8888/feed.atom"
     },
-    "title": "Best.House.on.the.Block.S01E06.From.Windows.to.Wallpaper.1080p.WEB.x264-CAFFEiNE  - x264 / 1080p / Web-DL",
-    "id": "https://www.morethan.tv/torrents.php?action=download&id=437840",
-    "link": "https://www.morethan.tv/torrents.php?action=download&id=437840",
-    "content": "This tag was empty in the original feed, it was added only for unit testing purposes",
-    "author": "TheShadow",
-    "date": "2019-03-08T20:01:45Z"
+    "title": "Истории академии Ядзикита / Yajikita Gakuen Douchuuki / Tales of Yajikita College [OVA] [2 из 2] [Без хардсаба] [JAP+SUB] [1989, приключения, боевые искусства, DVDRip] [924 MB]",
+    "id": "tag:rto.feed,2019-03-09:/t/5701301",
+    "link": "https://rutracker.org/forum/viewtopic.php?t=5701301",
+    "content": "Some sample content which is not present in a real feed but added here for testing purposes",
+    "author": "sergeandr",
+    "date": "2019-03-09T10:42:36Z"
   }
 }

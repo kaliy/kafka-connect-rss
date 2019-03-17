@@ -37,7 +37,7 @@ class FeedProviderTest {
 
     @Test
     void returnsEmptyOptionalIfFetchIsUnsuccessful() throws Exception {
-        FeedProvider feedProvider = new FeedProvider(new URL("http://random.host"),
+        FeedProvider feedProvider = new FeedProvider("http://random.host",
                 (url) -> Optional.empty(),
                 Feed.Builder::aFeed,
                 () -> spyItemBuilder
@@ -66,7 +66,7 @@ class FeedProviderTest {
 
     @Test
     void usesUrlFromTheConstructorAsFeedUrl() throws Exception {
-        FeedProvider feedProvider = new FeedProvider(new URL("http://naruto.uzumaki"),
+        FeedProvider feedProvider = new FeedProvider("http://naruto.uzumaki",
                 (url) -> Optional.of(syndFeed),
                 Feed.Builder::aFeed,
                 Item.Builder::anItem
@@ -333,7 +333,7 @@ class FeedProviderTest {
     }
 
     private FeedProvider feedProvider(SyndFeed syndFeed) throws MalformedURLException {
-        return new FeedProvider(new URL("http://random.host"),
+        return new FeedProvider("http://random.host",
                 (url) -> Optional.of(syndFeed),
                 Feed.Builder::aFeed,
                 () -> spyItemBuilder

@@ -3,7 +3,6 @@ package org.kaliy.kafka.connect.rss;
 import org.junit.jupiter.api.Test;
 import org.kaliy.kafka.connect.rss.model.Item;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
@@ -140,8 +139,8 @@ class FeedProviderIntegrationTest {
         assertThat(items).isEmpty();
     }
 
-    private URL url(String file) {
-        return FeedProviderTest.class.getClassLoader().getResource(file);
+    private String url(String file) {
+        return FeedProviderTest.class.getClassLoader().getResource(file).toString();
     }
 
 }

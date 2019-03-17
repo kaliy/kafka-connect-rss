@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class RssSourceConnectorConfigTest {
-    private static final String RSS_URL = "rss.url";
+    private static final String RSS_URL = "rss.urls";
     private static final String TOPIC = "topic";
     private static final String SLEEP_SECONDS = "sleep.seconds";
     private Map<String, String> config;
@@ -36,7 +36,7 @@ class RssSourceConnectorConfigTest {
     void createsConfigurationWithProperValues() {
         RssSourceConnectorConfig rssConfig = new RssSourceConnectorConfig(config);
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(rssConfig.getUrl()).isEqualTo("http://rss.com/feed.atom");
+            softly.assertThat(rssConfig.getUrls()).containsOnly("http://rss.com/feed.atom");
             softly.assertThat(rssConfig.getTopic()).isEqualTo("test_topic");
             softly.assertThat(rssConfig.getSleepInSeconds()).isEqualTo(666);
         });

@@ -3,14 +3,17 @@ package org.kaliy.kafka.connect.rss.config;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.kafka.common.config.ConfigDef.NO_DEFAULT_VALUE;
 
 public class RssSourceConnectorConfig extends AbstractConfig {
 
-    public static final String RSS_URL_CONFIG = "rss.url";
+    public static final String RSS_URL_CONFIG = "rss.urls";
     private static final String RSS_URL_DOC = "RSS or Atom feed URL";
+    public static final String RSS_URL_SEPARATOR = " ";
 
     public static final String TOPIC_CONFIG = "topic";
     private static final String TOPIC_DOC = "Topic to write to";
@@ -18,13 +21,16 @@ public class RssSourceConnectorConfig extends AbstractConfig {
     public static final String SLEEP_CONFIG = "sleep.seconds";
     private static final String SLEEP_DOC = "Time in seconds that connector will wait until querying feed again";
 
-    private final String url;
+    public static final String OFFSET_KEY = "sent_items";
+    public static final String OFFSET_DELIMITER = "|";
+
+    private final List<String> urls;
     private final String topic;
     private final int sleepInSeconds;
 
     public RssSourceConnectorConfig(Map<?, ?> originals) {
         super(config(), originals);
-        this.url = this.getString(RSS_URL_CONFIG);
+        this.urls = Arrays.asList(getString(RSS_URL_CONFIG).split(RSS_URL_SEPARATOR));
         this.topic = getString(TOPIC_CONFIG);
         this.sleepInSeconds = getInt(SLEEP_CONFIG);
     }
@@ -36,8 +42,8 @@ public class RssSourceConnectorConfig extends AbstractConfig {
                 .define(SLEEP_CONFIG, ConfigDef.Type.INT, 60, new PositiveIntegerValidator(), ConfigDef.Importance.MEDIUM, SLEEP_DOC);
     }
 
-    public String getUrl() {
-        return url;
+    public List<String> getUrls() {
+        return urls;
     }
 
     public String getTopic() {

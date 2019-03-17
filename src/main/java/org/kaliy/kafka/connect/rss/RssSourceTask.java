@@ -8,24 +8,25 @@ import org.kaliy.kafka.connect.rss.model.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kaliy.kafka.connect.rss.RssSchemas.VALUE_SCHEMA;
+import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_DELIMITER;
+import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_KEY;
 
 public class RssSourceTask extends SourceTask {
     private static Logger logger = LoggerFactory.getLogger(RssSourceTask.class);
 
     private RssSourceConnectorConfig config;
-    private FeedProvider feedProvider;
+    private Map<String, FeedProvider> feedProviders;
 
     @Override
     public String version() {
@@ -35,33 +36,34 @@ public class RssSourceTask extends SourceTask {
     @Override
     public void start(Map<String, String> props) {
         config = new RssSourceConnectorConfig(props);
-        try {
-            feedProvider = new FeedProvider(new URL(config.getUrl()));
-        } catch (MalformedURLException e) {
-            System.exit(1);
-        }
+        logger.info("Starting task with properties {}", props);
+        feedProviders = config.getUrls().stream()
+                .collect(Collectors.toMap(Function.identity(), FeedProvider::new));
     }
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         Thread.sleep(10000);
-        Map<String, ?> offsets = context.offsetStorageReader().offset(sourcePartition());
+        List<SourceRecord> records = feedProviders.entrySet().stream()
+                .flatMap(entry -> poll(entry.getKey(), entry.getValue()).stream())
+                .collect(Collectors.toList());
+        return records.isEmpty() ? null : records;
+    }
+
+    private List<SourceRecord> poll(String url, FeedProvider feedProvider) {
+        Map<String, ?> offsets = context.offsetStorageReader().offset(sourcePartition(url));
         Set<String> sentItems = null == offsets
                 ? Collections.emptySet()
-                : new HashSet<>(Arrays.asList(((String) offsets.get("sent_items")).split("|")));
+                : new HashSet<>(Arrays.asList(((String) offsets.get(OFFSET_KEY)).split(OFFSET_DELIMITER)));
 
         List<Item> newItems = feedProvider.getNewEvents(sentItems);
-        if (newItems.isEmpty()) {
-            return null;
-        }
-
-        List<SourceRecord> records = newItems.stream()
+        return newItems.stream()
                 .map(item -> item.toStruct()
                         .map(struct -> new Entry(struct, item.getOffset()))
                 ).flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .map(entry ->
                         new SourceRecord(
-                                sourcePartition(),
+                                sourcePartition(url),
                                 entry.offset,
                                 config.getTopic(),
                                 null, // partition will be inferred by the framework
@@ -70,12 +72,10 @@ public class RssSourceTask extends SourceTask {
                                 VALUE_SCHEMA,
                                 entry.struct)
                 ).collect(Collectors.toList());
-
-        return records.isEmpty() ? null : records;
     }
 
-    private Map<String, String> sourcePartition() {
-        return Collections.singletonMap(RssSchemas.FEED_URL_FIELD, config.getUrl());
+    private Map<String, String> sourcePartition(String url) {
+        return Collections.singletonMap(RssSchemas.FEED_URL_FIELD, url);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class RssSourceTask extends SourceTask {
 
         public Entry(Struct struct, String offset) {
             this.struct = struct;
-            this.offset = Collections.singletonMap("sent_items", offset);
+            this.offset = Collections.singletonMap(OFFSET_KEY, offset);
         }
     }
 }

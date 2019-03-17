@@ -36,7 +36,8 @@ class RssSourceConnectorIntegrationTest {
     static void beforeAll() throws Exception {
         wireMockServer = new WireMockServer(8888);
         wireMockServer.start();
-        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("atom/1.0.atom"))));
+        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/input.atom"))));
+        wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/input.rss"))));
         connectorThread = new Thread(() -> {
             try {
                 ConnectStandalone.main(new String[] {
@@ -56,11 +57,13 @@ class RssSourceConnectorIntegrationTest {
         await().atMost(org.awaitility.Duration.ONE_MINUTE)
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
-                    return consumerRecords.size() == 2;
+                    return consumerRecords.size() >= 4;
                 });
         consumerRecords.sort(Comparator.comparing(c -> ((String) c.value())));
         assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/output-1.json"));
         assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-2.json"));
+        assertThatJson(consumerRecords.get(2).value()).isEqualTo(read("integration-test/output-3.json"));
+        assertThatJson(consumerRecords.get(3).value()).isEqualTo(read("integration-test/output-4.json"));
     }
 
     private static Consumer<String, String> createConsumer() {

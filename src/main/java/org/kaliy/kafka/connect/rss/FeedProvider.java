@@ -24,21 +24,23 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_DELIMITER;
+
 public class FeedProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(FeedProvider.class);
 
-    private final URL url;
-    private final Function<URL, Optional<SyndFeed>> feedFetcher;
+    private final String url;
+    private final Function<String, Optional<SyndFeed>> feedFetcher;
     private final Supplier<Feed.Builder> feedBuilderFactory;
     private final Supplier<Item.Builder> itemBuilderFactory;
 
-    public FeedProvider(URL url) {
+    public FeedProvider(String url) {
         this(url, feedFetcher(url), Feed.Builder::aFeed, Item.Builder::anItem);
     }
 
-    public FeedProvider(URL url,
-                        Function<URL, Optional<SyndFeed>> feedFetcher,
+    public FeedProvider(String url,
+                        Function<String, Optional<SyndFeed>> feedFetcher,
                         Supplier<Feed.Builder> feedBuilderFactory,
                         Supplier<Item.Builder> itemBuilderFactory) {
         this.url = url;
@@ -55,7 +57,7 @@ public class FeedProvider {
         SyndFeed syndFeed = maybeFeed.get();
 
         String feedTitle = trim(syndFeed.getTitle());
-        String feedUrl = url.toString();
+        String feedUrl = url;
 
         Feed feed = feedBuilderFactory.get().withUrl(feedUrl).withTitle(feedTitle).build();
 
@@ -73,7 +75,7 @@ public class FeedProvider {
 
         Set<String> stillLeftItems = allItems.stream().map(Item::toBase64)
                 .filter(sentItems::contains).collect(Collectors.toSet());
-        StringJoiner joiner = new StringJoiner("|");
+        StringJoiner joiner = new StringJoiner(OFFSET_DELIMITER);
         stillLeftItems.forEach(joiner::add);
 
         return allItems.stream()
@@ -127,11 +129,11 @@ public class FeedProvider {
         return null == string ? null : string.trim();
     }
 
-    private static Function<URL, Optional<SyndFeed>> feedFetcher(URL url) {
+    private static Function<String, Optional<SyndFeed>> feedFetcher(String url) {
         return (u) -> {
             try {
                 SyndFeedInput input = new SyndFeedInput();
-                return Optional.of(input.build(new XmlReader(url)));
+                return Optional.of(input.build(new XmlReader(new URL(url))));
             } catch (Exception e) {
                 logger.warn("Unable to process feed from {}", url, e);
                 return Optional.empty();
