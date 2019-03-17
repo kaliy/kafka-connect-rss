@@ -3,6 +3,7 @@ package org.kaliy.kafka.connect.rss;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
+import org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig;
 import org.kaliy.kafka.connect.rss.model.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

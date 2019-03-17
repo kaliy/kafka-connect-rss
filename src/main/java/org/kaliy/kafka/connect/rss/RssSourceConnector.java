@@ -3,6 +3,7 @@ package org.kaliy.kafka.connect.rss;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
+import org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig;
 
 import java.util.Collections;
 import java.util.List;
