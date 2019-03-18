@@ -126,6 +126,16 @@ class FeedProviderTest {
     }
 
     @Test
+    void skipsLinkWithNullHrefAndReturnsFirstNonNull() throws Exception {
+        syndEntry.setLink(null);
+        syndEntry.setLinks(Arrays.asList(syndLink(null), syndLink(null), syndLink("Raphael"), syndLink("Michelangelo")));
+
+        List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
+
+        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Raphael"));
+    }
+
+    @Test
     void trimsItemUriAndUsesItAsAnId() throws Exception {
         syndEntry.setUri("     Junpei      ");
 

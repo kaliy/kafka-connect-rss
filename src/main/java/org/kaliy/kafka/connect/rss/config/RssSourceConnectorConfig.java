@@ -23,6 +23,7 @@ public class RssSourceConnectorConfig extends AbstractConfig {
 
     public static final String OFFSET_KEY = "sent_items";
     public static final String OFFSET_DELIMITER = "|";
+    public static final String OFFSET_DELIMITER_REGEX = "\\|";
 
     private final List<String> urls;
     private final String topic;

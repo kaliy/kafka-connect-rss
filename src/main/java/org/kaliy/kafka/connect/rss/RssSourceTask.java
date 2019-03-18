@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kaliy.kafka.connect.rss.RssSchemas.VALUE_SCHEMA;
-import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_DELIMITER;
+import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_DELIMITER_REGEX;
 import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_KEY;
 
 public class RssSourceTask extends SourceTask {
@@ -27,6 +27,10 @@ public class RssSourceTask extends SourceTask {
 
     private RssSourceConnectorConfig config;
     private Map<String, FeedProvider> feedProviders;
+    // Task is executed in a single thread so no synchronization is needed
+    private boolean shouldWait = false;
+    private Function<String, FeedProvider> feedProviderFactory = FeedProvider::new;
+    private Function<Map<String, String>, RssSourceConnectorConfig> configFactory = RssSourceConnectorConfig::new;
 
     @Override
     public String version() {
@@ -35,32 +39,35 @@ public class RssSourceTask extends SourceTask {
 
     @Override
     public void start(Map<String, String> props) {
-        config = new RssSourceConnectorConfig(props);
+        config = configFactory.apply(props);
         logger.info("Starting task with properties {}", props);
         feedProviders = config.getUrls().stream()
-                .collect(Collectors.toMap(Function.identity(), FeedProvider::new));
+                .collect(Collectors.toMap(Function.identity(), feedProviderFactory));
     }
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
-        Thread.sleep(10000);
+        if (shouldWait) {
+            Thread.sleep(config.getSleepInSeconds() * 1000);
+        }
         List<SourceRecord> records = feedProviders.entrySet().stream()
                 .flatMap(entry -> poll(entry.getKey(), entry.getValue()).stream())
                 .collect(Collectors.toList());
+        shouldWait = true;
         return records.isEmpty() ? null : records;
     }
 
     private List<SourceRecord> poll(String url, FeedProvider feedProvider) {
         Map<String, ?> offsets = context.offsetStorageReader().offset(sourcePartition(url));
-        Set<String> sentItems = null == offsets
+        String maybeOffsets = null == offsets ? null : (String) offsets.get(OFFSET_KEY);
+        Set<String> sentItems = null == maybeOffsets
                 ? Collections.emptySet()
-                : new HashSet<>(Arrays.asList(((String) offsets.get(OFFSET_KEY)).split(OFFSET_DELIMITER)));
+                : new HashSet<>(Arrays.asList(maybeOffsets.split(OFFSET_DELIMITER_REGEX)));
 
         List<Item> newItems = feedProvider.getNewEvents(sentItems);
         return newItems.stream()
-                .map(item -> item.toStruct()
-                        .map(struct -> new Entry(struct, item.getOffset()))
-                ).flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
+                .map(item -> item.toStruct().map(struct -> new Entry(struct, item.getOffset())))
+                .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
                 .map(entry ->
                         new SourceRecord(
                                 sourcePartition(url),
@@ -80,6 +87,14 @@ public class RssSourceTask extends SourceTask {
 
     @Override
     public void stop() {
+    }
+
+    public void setFeedProviderFactory(Function<String, FeedProvider> feedProviderFactory) {
+        this.feedProviderFactory = feedProviderFactory;
+    }
+
+    public void setConfigFactory(Function<Map<String, String>, RssSourceConnectorConfig> configFactory) {
+        this.configFactory = configFactory;
     }
 
     private static class Entry {
