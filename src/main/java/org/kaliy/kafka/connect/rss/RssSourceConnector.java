@@ -32,12 +32,10 @@ public class RssSourceConnector extends SourceConnector {
         List<String> urls = rssSourceConnectorConfig.getUrls();
         if (maxTasks > urls.size()) {
             logger.info("URLs number defined in the configuration file is lower than maximum task number, only {} tasks will be created", urls.size());
-            maxTasks = urls.size();
         }
-        int partitions = Math.max(urls.size() / maxTasks, 1);
         AtomicInteger i = new AtomicInteger(0);
-        List<Map<String, String>> collect = urls.stream()
-                .collect(Collectors.groupingBy(it -> i.getAndIncrement() / partitions))
+        return urls.stream()
+                .collect(Collectors.groupingBy(it -> i.getAndIncrement() % maxTasks))
                 .values()
                 .stream()
                 .map(partitionedUrls -> {
@@ -45,7 +43,6 @@ public class RssSourceConnector extends SourceConnector {
                     config.put(RSS_URL_CONFIG, String.join(RSS_URL_SEPARATOR, partitionedUrls));
                     return config;
                 }).collect(Collectors.toList());
-        return collect;
     }
 
     public void stop() {
