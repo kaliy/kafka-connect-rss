@@ -6,9 +6,9 @@ import org.apache.kafka.common.config.ConfigException;
 public class PositiveIntegerValidator implements ConfigDef.Validator {
     @Override
     public void ensureValid(String name, Object value) {
-        int sleepInSecods = (int) value;
-        if (sleepInSecods < 0) {
-            throw new ConfigException(name, value, "sleep interval should be 0 or higher");
+        int number = (int) value;
+        if (number < 0) {
+            throw new ConfigException(name, value, "should be 0 or higher");
         }
     }
 

@@ -14,7 +14,7 @@ class PositiveIntegerValidatorTest {
     void throwsExceptionIfValueIsNegative() {
         assertThatExceptionOfType(ConfigException.class)
                 .isThrownBy(() -> validator.ensureValid("sleep.seconds", -1))
-                .withMessage("Invalid value -1 for configuration sleep.seconds: sleep interval should be 0 or higher");
+                .withMessage("Invalid value -1 for configuration sleep.seconds: should be 0 or higher");
     }
 
     @Test
