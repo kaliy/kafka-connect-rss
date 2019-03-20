@@ -31,7 +31,12 @@ In case of retry, no poll will be done and kafka connect will continue to send r
 
 ## Waiting for a next poll
 
-Thread.sleep() is an awful way to achieve this, I need to investigate further. WorkerSourceTask.execute() has following code:
+Thread.sleep() is an awful way to achieve this because it blocks the task and it won't kafka connect to stop it as it will wait for poll() to finish. 
+It waits for 5 seconds by default (can be changed by `task.shutdown.graceful.timeout.ms` parameter) and then just just continue to stop Worker (`Worker#196` and then `Worker#585`) or StandaloneHerder (`StandaloneHerder#107` and then `StandaloneHerder#314`) depending on the kafka connect mode.  
+
+It is definitely a problem for a standalone mode but I'm not really sure it's a problem in a distributed mode, I need to check it.
+
+I've decided that having CountDownLatch and count it down in the stop() method should be good enough. Although I can look further for better a way to pause the thread. WorkerSourceTask.execute() has following code:
 
 ~~~~
             while (!isStopping()) {
@@ -45,7 +50,12 @@ Thread.sleep() is an awful way to achieve this, I need to investigate further. W
                 ...
             }
 ~~~~ 
-shouldPause() is checking for `this.targetState == TargetState.PAUSED`, maybe we can utilize it somehow if that's not internal kafka connect functionality.
+shouldPause() is checking for `this.targetState == TargetState.PAUSED`, maybe I can utilize it somehow if that's not internal kafka connect functionality.
+
+I've checked some public projects for their ways of waiting:
+- kafka-connect-jdbc uses `org.apache.kafka.common.utils.Time` which uses Thread.sleep() underneath but wraps the InterruptedException to interrupt the current thread (`SystemTime#36`)
+- kafka-connect-github-source uses Thread.sleep()
+- kafka-connect-irc has no waiting whatsoever :)
 
 ## Preventing reprocessing of the same item in feed
 

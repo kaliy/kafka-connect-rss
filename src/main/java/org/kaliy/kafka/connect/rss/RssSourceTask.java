@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +33,7 @@ public class RssSourceTask extends SourceTask {
     private boolean shouldWait = false;
     private Function<String, FeedProvider> feedProviderFactory = FeedProvider::new;
     private Function<Map<String, String>, RssSourceConnectorConfig> configFactory = RssSourceConnectorConfig::new;
+    private CountDownLatch stopLatch = new CountDownLatch(1);
 
     @Override
     public String version() {
@@ -47,17 +50,26 @@ public class RssSourceTask extends SourceTask {
 
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
+        boolean shouldStop = false;
         if (shouldWait) {
-            Thread.sleep(config.getSleepInSeconds() * 1000);
+            logger.debug("Waiting for {} seconds for the next poll", config.getSleepInSeconds());
+            shouldStop = stopLatch.await(config.getSleepInSeconds(), TimeUnit.SECONDS);
         }
-        List<SourceRecord> records = feedProviders.entrySet().stream()
-                .flatMap(entry -> poll(entry.getKey(), entry.getValue()).stream())
-                .collect(Collectors.toList());
-        shouldWait = true;
-        return records.isEmpty() ? null : records;
+        if (!shouldStop) {
+            logger.debug("Started new polling");
+            List<SourceRecord> records = feedProviders.entrySet().stream()
+                    .flatMap(entry -> poll(entry.getKey(), entry.getValue()).stream())
+                    .collect(Collectors.toList());
+            shouldWait = true;
+            return records.isEmpty() ? null : records;
+        } else {
+            logger.debug("Received signal to stop, didn't poll anything");
+            return null;
+        }
     }
 
     private List<SourceRecord> poll(String url, FeedProvider feedProvider) {
+        logger.debug("Polling for new messages from {}", url);
         Map<String, ?> offsets = context.offsetStorageReader().offset(sourcePartition(url));
         String maybeOffsets = null == offsets ? null : (String) offsets.get(OFFSET_KEY);
         Set<String> sentItems = null == maybeOffsets
@@ -65,6 +77,7 @@ public class RssSourceTask extends SourceTask {
                 : new HashSet<>(Arrays.asList(maybeOffsets.split(OFFSET_DELIMITER_REGEX)));
 
         List<Item> newItems = feedProvider.getNewEvents(sentItems);
+        logger.debug("Got {} new items from {}", newItems.size(), url);
         return newItems.stream()
                 .map(item -> item.toStruct().map(struct -> new Entry(struct, item.getOffset())))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
@@ -87,6 +100,7 @@ public class RssSourceTask extends SourceTask {
 
     @Override
     public void stop() {
+        stopLatch.countDown();
     }
 
     public void setFeedProviderFactory(Function<String, FeedProvider> feedProviderFactory) {

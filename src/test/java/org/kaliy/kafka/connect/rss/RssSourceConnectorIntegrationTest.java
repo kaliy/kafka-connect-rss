@@ -9,7 +9,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.connect.cli.ConnectStandalone;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +28,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.awaitility.Awaitility.await;
 
 class RssSourceConnectorIntegrationTest {
-    private static Thread connectorThread;
+    public static final StandaloneKafkaConnect STANDALONE_KAFKA_CONNECT = new StandaloneKafkaConnect();
     private static WireMockServer wireMockServer;
 
     @BeforeAll
@@ -38,16 +37,7 @@ class RssSourceConnectorIntegrationTest {
         wireMockServer.start();
         wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/input.atom"))));
         wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/input.rss"))));
-        connectorThread = new Thread(() -> {
-            try {
-                ConnectStandalone.main(new String[] {
-                        "config/worker.properties", "config/RssSourceConnectorExample.properties"
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        connectorThread.start();
+        STANDALONE_KAFKA_CONNECT.start();
     }
 
     @Test
@@ -64,6 +54,8 @@ class RssSourceConnectorIntegrationTest {
         assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-2.json"));
         assertThatJson(consumerRecords.get(2).value()).isEqualTo(read("integration-test/output-3.json"));
         assertThatJson(consumerRecords.get(3).value()).isEqualTo(read("integration-test/output-4.json"));
+
+        STANDALONE_KAFKA_CONNECT.stop();
     }
 
     private static Consumer<String, String> createConsumer() {
