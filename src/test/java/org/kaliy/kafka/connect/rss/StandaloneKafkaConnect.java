@@ -122,6 +122,7 @@ public class StandaloneKafkaConnect {
         Map<String, String> workerProps = new HashMap<>();
         workerProps.put("name", "RssSourceConnectorDemo");
         workerProps.put("tasks.max", "2");
+        workerProps.put("sleep.seconds", "2");
         workerProps.put("connector.class", "org.kaliy.kafka.connect.rss.RssSourceConnector");
         workerProps.put("rss.urls", "http://localhost:8888/feed.atom http://localhost:8888/feed.rss");
         workerProps.put("topic", "test_topic");

@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +41,7 @@ class RssSourceTaskTest {
     void setUp() {
         rssSourceTask.setFeedProviderFactory((url) -> mockFeedProvider);
         when(mockConfig.getUrls()).thenReturn(Collections.singletonList("url"));
-        when(mockConfig.getSleepInSeconds()).thenReturn(5);
+        when(mockConfig.getSleepInSeconds()).thenReturn(0);
         when(mockConfig.getTopic()).thenReturn("test_topic");
         rssSourceTask.setConfigFactory((map) -> mockConfig);
         SourceTaskContext mockContext = mock(SourceTaskContext.class);
@@ -139,6 +140,39 @@ class RssSourceTaskTest {
 
         verify(mockFeedProvider).getNewEvents(captor.capture());
         assertThat(captor.getValue()).isEmpty();
+    }
+
+    @Test
+    void usesOffsetsFromTheLastItemInPollResultsOnNextPolling() throws InterruptedException {
+        Item item1 = mockItem(), item2 = mockItem();
+        when(item1.getOffset()).thenReturn("two|three|four");
+        when(item2.getOffset()).thenReturn("two|three|four|five");
+        when(mockOffsetStorageReader.offset(any())).thenReturn(singletonMap("sent_items", "one|two|three"));
+        when(mockFeedProvider.getNewEvents(any())).thenReturn(Arrays.asList(item1, item2));
+        ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass((Class) Set.class);
+        rssSourceTask.start(null);
+        rssSourceTask.poll();
+        reset(mockFeedProvider);
+
+        rssSourceTask.poll();
+
+        verify(mockFeedProvider).getNewEvents(captor.capture());
+        assertThat(captor.getValue()).containsOnly("two", "three", "four", "five");
+    }
+
+    @Test
+    void doesNotOverrideOffsetsIfFeedProvidersDoesNotReturnAnything() throws InterruptedException {
+        when(mockOffsetStorageReader.offset(any())).thenReturn(singletonMap("sent_items", "one|two|three"));
+        when(mockFeedProvider.getNewEvents(any())).thenReturn(Collections.emptyList());
+        ArgumentCaptor<Set<String>> captor = ArgumentCaptor.forClass((Class) Set.class);
+        rssSourceTask.start(null);
+        rssSourceTask.poll();
+        reset(mockFeedProvider);
+
+        rssSourceTask.poll();
+
+        verify(mockFeedProvider).getNewEvents(captor.capture());
+        assertThat(captor.getValue()).containsOnly("one", "two", "three");
     }
 
     @Test

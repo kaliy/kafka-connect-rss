@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": true,
+            "field": "title"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "url"
+          }
+        ],
+        "optional": false,
+        "name": "org.kaliy.kafka.rss.Feed",
+        "version": 1,
+        "field": "feed"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "title"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "link"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "content"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "author"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "date"
+      }
+    ],
+    "optional": false,
+    "name": "org.kaliy.kafka.rss.Item",
+    "version": 1
+  },
+  "payload": {
+    "feed": {
+      "title": "Общая по всем разделам",
+      "url": "http://localhost:8888/feed.atom"
+    },
+    "title": "Критика буржуазной идеологии и ревизионизма - Матейчек Я. - Политическая система социализма и критика правого ревизионизма в ЧССР [1980, DjVu, RUS] [5.3 MB]",
+    "id": "tag:rto.feed,2019-03-20:/t/5707056",
+    "link": "https://rutracker.org/forum/viewtopic.php?t=5707056",
+    "content": null,
+    "author": "Scaramucciа",
+    "date": "2019-03-20T21:16:56Z"
+  }
+}

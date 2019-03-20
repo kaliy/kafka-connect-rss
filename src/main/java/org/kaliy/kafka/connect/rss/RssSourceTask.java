@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class RssSourceTask extends SourceTask {
     private Function<String, FeedProvider> feedProviderFactory = FeedProvider::new;
     private Function<Map<String, String>, RssSourceConnectorConfig> configFactory = RssSourceConnectorConfig::new;
     private CountDownLatch stopLatch = new CountDownLatch(1);
+    private Map<String, Set<String>> previouslySentItems = new HashMap<>();
 
     @Override
     public String version() {
@@ -44,6 +46,14 @@ public class RssSourceTask extends SourceTask {
     public void start(Map<String, String> props) {
         config = configFactory.apply(props);
         logger.info("Starting task with properties {}", props);
+        config.getUrls().forEach(url -> {
+            Map<String, ?> offsets = context.offsetStorageReader().offset(sourcePartition(url));
+            String maybeOffsets = null == offsets ? null : (String) offsets.get(OFFSET_KEY);
+            Set<String> sentItems = null == maybeOffsets
+                    ? Collections.emptySet()
+                    : new HashSet<>(Arrays.asList(maybeOffsets.split(OFFSET_DELIMITER_REGEX)));
+            previouslySentItems.put(url, sentItems);
+        });
         feedProviders = config.getUrls().stream()
                 .collect(Collectors.toMap(Function.identity(), feedProviderFactory));
     }
@@ -70,14 +80,13 @@ public class RssSourceTask extends SourceTask {
 
     private List<SourceRecord> poll(String url, FeedProvider feedProvider) {
         logger.debug("Polling for new messages from {}", url);
-        Map<String, ?> offsets = context.offsetStorageReader().offset(sourcePartition(url));
-        String maybeOffsets = null == offsets ? null : (String) offsets.get(OFFSET_KEY);
-        Set<String> sentItems = null == maybeOffsets
-                ? Collections.emptySet()
-                : new HashSet<>(Arrays.asList(maybeOffsets.split(OFFSET_DELIMITER_REGEX)));
-
-        List<Item> newItems = feedProvider.getNewEvents(sentItems);
+        List<Item> newItems = feedProvider.getNewEvents(previouslySentItems.get(url));
         logger.debug("Got {} new items from {}", newItems.size(), url);
+        if (!newItems.isEmpty()) {
+            previouslySentItems.put(url, new HashSet<>(Arrays.asList(
+                    newItems.get(newItems.size() - 1).getOffset().split(OFFSET_DELIMITER_REGEX)))
+            );
+        }
         return newItems.stream()
                 .map(item -> item.toStruct().map(struct -> new Entry(struct, item.getOffset())))
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty))
