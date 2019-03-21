@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>tag:rto.feed,2000:/f/0</id>
+    <link href="http://rutracker.org/forum/"/>
+    <updated>2019-03-09T11:50:05+00:00</updated>
+    <title>Общая по всем разделам</title>
+    <entry>
+        <id>tag:rto.feed,2019-03-09:/t/5695095</id>
+        <link href="https://rutracker.org/forum/viewtopic.php?t=5695095"/>
+        <updated>2019-03-09T10:41:58+00:00</updated>
+        <title>[Обновлено] Чудотворцы / Miracle Workers / Сезон: 1 / Серии: 1-3 из 7 (Райан Кейс) [2019, США, комедия., WEB-DL 720p] MVO (NewStudio) + Original [2.12 GB]</title>
+        <author>
+            <name>kogesan</name>
+        </author>
+        <category term="f-2366" label="Зарубежные сериалы (HD Video)"/>
+    </entry>
+    <entry>
+        <id>tag:rto.feed,2019-03-20:/t/5707056</id>
+        <link href="https://rutracker.org/forum/viewtopic.php?t=5707056"/>
+        <updated>2019-03-20T21:16:56+00:00</updated>
+        <title>Критика буржуазной идеологии и ревизионизма - Матейчек Я. - Политическая система социализма и критика правого ревизионизма в ЧССР [1980, DjVu, RUS] [5.3 MB]</title>
+        <author>
+            <name>Scaramucciа</name>
+        </author>
+        <category term="f-2427" label="История Европы"/>
+    </entry>
+</feed>

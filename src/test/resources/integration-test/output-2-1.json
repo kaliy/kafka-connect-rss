@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": true,
+            "field": "title"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "url"
+          }
+        ],
+        "optional": false,
+        "name": "org.kaliy.kafka.rss.Feed",
+        "version": 1,
+        "field": "feed"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "title"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "link"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "content"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "author"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "date"
+      }
+    ],
+    "optional": false,
+    "name": "org.kaliy.kafka.rss.Item",
+    "version": 1
+  },
+  "payload": {
+    "feed": {
+      "title": "All Torrents :: morethan.tv",
+      "url": "http://localhost:8888/feed.rss"
+    },
+    "title": "Abduction.2019.1080p.WEB-DL.H264.AC3-EVO  - h264 / 1080p / Web-DL",
+    "id": "https://www.morethan.tv/torrents.php?action=download&id=444028",
+    "link": "https://www.morethan.tv/torrents.php?action=download&id=444028",
+    "content": "",
+    "author": "Eir",
+    "date": "2019-03-20T22:18:12Z"
+  }
+}

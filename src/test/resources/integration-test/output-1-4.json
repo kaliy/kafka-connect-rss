@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": true,
+            "field": "title"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "url"
+          }
+        ],
+        "optional": false,
+        "name": "org.kaliy.kafka.rss.Feed",
+        "version": 1,
+        "field": "feed"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "title"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "link"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "content"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "author"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "date"
+      }
+    ],
+    "optional": false,
+    "name": "org.kaliy.kafka.rss.Item",
+    "version": 1
+  },
+  "payload": {
+    "feed": {
+      "title": "Общая по всем разделам",
+      "url": "http://localhost:8888/feed.atom"
+    },
+    "title": "Истории академии Ядзикита / Yajikita Gakuen Douchuuki / Tales of Yajikita College [OVA] [2 из 2] [Без хардсаба] [JAP+SUB] [1989, приключения, боевые искусства, DVDRip] [924 MB]",
+    "id": "tag:rto.feed,2019-03-09:/t/5701301",
+    "link": "https://rutracker.org/forum/viewtopic.php?t=5701301",
+    "content": "Some sample content which is not present in a real feed but added here for testing purposes",
+    "author": "sergeandr",
+    "date": "2019-03-09T10:42:36Z"
+  }
+}

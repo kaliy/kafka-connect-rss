@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": true,
+            "field": "title"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "url"
+          }
+        ],
+        "optional": false,
+        "name": "org.kaliy.kafka.rss.Feed",
+        "version": 1,
+        "field": "feed"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "title"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "link"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "content"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "author"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "date"
+      }
+    ],
+    "optional": false,
+    "name": "org.kaliy.kafka.rss.Item",
+    "version": 1
+  },
+  "payload": {
+    "feed": {
+      "title": "Общая по всем разделам",
+      "url": "http://localhost:8888/feed.atom"
+    },
+    "title": "[Обновлено] Чудотворцы / Miracle Workers / Сезон: 1 / Серии: 1-3 из 7 (Райан Кейс) [2019, США, комедия., WEB-DL 720p] MVO (NewStudio) + Original [2.12 GB]",
+    "id": "tag:rto.feed,2019-03-09:/t/5695095",
+    "link": "https://rutracker.org/forum/viewtopic.php?t=5695095",
+    "content": null,
+    "author": "kogesan",
+    "date": "2019-03-09T10:41:58Z"
+  }
+}

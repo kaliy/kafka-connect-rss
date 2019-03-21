@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": true,
+            "field": "title"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "url"
+          }
+        ],
+        "optional": false,
+        "name": "org.kaliy.kafka.rss.Feed",
+        "version": 1,
+        "field": "feed"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "title"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "link"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "content"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "author"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "date"
+      }
+    ],
+    "optional": false,
+    "name": "org.kaliy.kafka.rss.Item",
+    "version": 1
+  },
+  "payload": {
+    "feed": {
+      "title": "All Torrents :: morethan.tv",
+      "url": "http://localhost:8888/feed.rss"
+    },
+    "title": "Best.House.on.the.Block.S01E06.From.Windows.to.Wallpaper.1080p.WEB.x264-CAFFEiNE  - x264 / 1080p / Web-DL",
+    "id": "https://www.morethan.tv/torrents.php?action=download&id=437840",
+    "link": "https://www.morethan.tv/torrents.php?action=download&id=437840",
+    "content": "This tag was empty in the original feed, it was added only for unit testing purposes",
+    "author": "TheShadow",
+    "date": "2019-03-08T20:01:45Z"
+  }
+}

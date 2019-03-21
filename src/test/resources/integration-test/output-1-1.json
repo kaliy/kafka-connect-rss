@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "string",
+            "optional": true,
+            "field": "title"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "url"
+          }
+        ],
+        "optional": false,
+        "name": "org.kaliy.kafka.rss.Feed",
+        "version": 1,
+        "field": "feed"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "title"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "link"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "content"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "author"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "date"
+      }
+    ],
+    "optional": false,
+    "name": "org.kaliy.kafka.rss.Item",
+    "version": 1
+  },
+  "payload": {
+    "feed": {
+      "title": "All Torrents :: morethan.tv",
+      "url": "http://localhost:8888/feed.rss"
+    },
+    "title": "Best.House.on.the.Block.S01E05.Big.Waste.of.Space.WEB.x264-CAFFEiNE  - x264 / SD / Web-DL",
+    "id": "https://www.morethan.tv/torrents.php?action=download&id=437839",
+    "link": "https://www.morethan.tv/torrents.php?action=download&id=437839",
+    "content": "",
+    "author": "TheShadow",
+    "date": "2019-03-08T19:59:11Z"
+  }
+}
