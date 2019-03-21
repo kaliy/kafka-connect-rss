@@ -17,6 +17,7 @@ import org.apache.kafka.connect.util.FutureCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,9 +32,20 @@ public class StandaloneKafkaConnect {
     private static final Logger logger = LoggerFactory.getLogger(StandaloneKafkaConnect.class);
 
     private Thread connectThread;
-    private CountDownLatch stopLatch = new CountDownLatch(1);
+    private CountDownLatch stopLatch;
+
+    private final String offsetsFilename;
+    private final int maxTasks;
+    private final String urls;
+
+    public StandaloneKafkaConnect(String offsetsFilename, int maxTasks, String urls) {
+        this.offsetsFilename = offsetsFilename;
+        this.maxTasks = maxTasks;
+        this.urls = urls;
+    }
 
     public void start() {
+        stopLatch = new CountDownLatch(1);
         connectThread = new Thread(() -> {
             Map<String, String> workerProps = workerProps();
 
@@ -75,14 +87,17 @@ public class StandaloneKafkaConnect {
             } catch (Throwable t) {
                 logger.error("Stopping after connector error", t);
                 connect.stop();
+                connect.awaitStop();
             }
             try {
                 stopLatch.await();
             } catch (InterruptedException e) {
                 logger.info("Connect thread has been interrupted, stopping.");
                 connect.stop();
+                connect.awaitStop();
             }
             connect.stop();
+            connect.awaitStop();
         });
 
         connectThread.start();
@@ -91,13 +106,17 @@ public class StandaloneKafkaConnect {
     public void stop() {
         stopLatch.countDown();
         while (connectThread.isAlive()) {
-            logger.info("Waiting");
+            logger.info("Waiting for the kafka connect to stop");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void deleteOffsetsFile() {
+        new File(offsetsFilename).delete();
     }
 
     private Map<String, String> workerProps() {
@@ -113,7 +132,7 @@ public class StandaloneKafkaConnect {
         workerProps.put("internal.value.converter.schemas.enable", "true");
         workerProps.put("rest.port", "8086");
         workerProps.put("rest.host.name", "127.0.0.1");
-        workerProps.put("offset.storage.file.filename", "target/standalone.offsets");
+        workerProps.put("offset.storage.file.filename", offsetsFilename);
         workerProps.put("offset.flush.interval.ms", "10000");
         return workerProps;
     }
@@ -121,10 +140,10 @@ public class StandaloneKafkaConnect {
     private Map<String, String> connectorProps() {
         Map<String, String> workerProps = new HashMap<>();
         workerProps.put("name", "RssSourceConnectorDemo");
-        workerProps.put("tasks.max", "2");
+        workerProps.put("tasks.max", Integer.toString(maxTasks));
         workerProps.put("sleep.seconds", "2");
         workerProps.put("connector.class", "org.kaliy.kafka.connect.rss.RssSourceConnector");
-        workerProps.put("rss.urls", "http://localhost:8888/feed.atom http://localhost:8888/feed.rss");
+        workerProps.put("rss.urls", urls);
         workerProps.put("topic", "test_topic");
         return workerProps;
     }

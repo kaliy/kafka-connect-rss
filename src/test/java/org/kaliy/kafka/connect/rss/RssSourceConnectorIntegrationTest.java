@@ -11,8 +11,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
@@ -33,7 +35,9 @@ import static org.awaitility.Awaitility.await;
 class RssSourceConnectorIntegrationTest {
     private static WireMockServer wireMockServer;
 
-    private StandaloneKafkaConnect standaloneKafkaConnect = new StandaloneKafkaConnect();
+    private static final String URLS = "http://localhost:8888/feed.atom http://localhost:8888/feed.rss";
+    private StandaloneKafkaConnect standaloneKafkaConnect =
+            new StandaloneKafkaConnect("target/" + UUID.randomUUID().toString(), 2, URLS);
 
     @BeforeAll
     static void beforeAll() {
@@ -41,18 +45,21 @@ class RssSourceConnectorIntegrationTest {
         wireMockServer.start();
     }
 
+    @BeforeEach
+    void setUp() throws Exception {
+        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/input-1.atom"))));
+        wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/input-1.rss"))));
+    }
+
     @AfterEach
     void tearDown() {
         standaloneKafkaConnect.stop();
+        standaloneKafkaConnect.deleteOffsetsFile();
         wireMockServer.resetAll();
     }
 
     @Test
-    void pollsMessagesMultipleTimes() throws IOException {
-        //TODO: split this test into few
-        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/multiple-requests/input-1.atom"))));
-        wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/multiple-requests/input-1.rss"))));
-
+    void pollsFeedsAndSendsMessages() throws IOException {
         standaloneKafkaConnect.start();
 
         Consumer<String, String> consumer = createConsumer();
@@ -63,16 +70,62 @@ class RssSourceConnectorIntegrationTest {
                     return consumerRecords.size() == 4;
                 });
         consumerRecords.sort(Comparator.comparing(c -> ((String) c.value())));
-        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/multiple-requests/output-1-1.json"));
-        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/multiple-requests/output-1-2.json"));
-        assertThatJson(consumerRecords.get(2).value()).isEqualTo(read("integration-test/multiple-requests/output-1-3.json"));
-        assertThatJson(consumerRecords.get(3).value()).isEqualTo(read("integration-test/multiple-requests/output-1-4.json"));
+        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/output-1-1.json"));
+        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-1-2.json"));
+        assertThatJson(consumerRecords.get(2).value()).isEqualTo(read("integration-test/output-1-3.json"));
+        assertThatJson(consumerRecords.get(3).value()).isEqualTo(read("integration-test/output-1-4.json"));
+    }
+
+    @Test
+    void pollsMultipleUrlsFromASingleTask() throws IOException {
+        String offsetsFilename = "target/" + UUID.randomUUID().toString();
+        standaloneKafkaConnect = new StandaloneKafkaConnect(offsetsFilename, 1, URLS);
+        standaloneKafkaConnect.start();
+
+        Consumer<String, String> consumer = createConsumer();
+        List<ConsumerRecord> consumerRecords = new ArrayList<>();
+        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+                .until(() -> {
+                    consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
+                    return consumerRecords.size() == 4;
+                });
+        consumerRecords.sort(Comparator.comparing(c -> ((String) c.value())));
+        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/output-1-1.json"));
+        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-1-2.json"));
+        assertThatJson(consumerRecords.get(2).value()).isEqualTo(read("integration-test/output-1-3.json"));
+        assertThatJson(consumerRecords.get(3).value()).isEqualTo(read("integration-test/output-1-4.json"));
+    }
+
+    @Test
+    void doesNotSendSameMessagesAfterMultiplePolling() throws Exception {
+        standaloneKafkaConnect.start();
+
+        Consumer<String, String> consumer = createConsumer();
+        List<ConsumerRecord> consumerRecords = new ArrayList<>();
+        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+                .until(() -> {
+                    consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
+                    return consumerRecords.size() == 4;
+                });
 
         IntStream.rangeClosed(0, 5).forEach((i) -> assertThat(consumer.poll(Duration.ofSeconds(1)).iterator()).isExhausted());
+    }
 
+    @Test
+    void sendsOnlyNewMessagesOnNewPolls() throws Exception {
+        standaloneKafkaConnect.start();
+
+        Consumer<String, String> consumer = createConsumer();
+        List<ConsumerRecord> consumerRecords = new ArrayList<>();
+        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+                .until(() -> {
+                    consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
+                    return consumerRecords.size() == 4;
+                });
         consumerRecords.clear();
-        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/multiple-requests/input-2.atom"))));
-        wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/multiple-requests/input-2.rss"))));
+
+        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/input-2.atom"))));
+        wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/input-2.rss"))));
 
         await().atMost(org.awaitility.Duration.ONE_MINUTE)
                 .until(() -> {
@@ -80,8 +133,40 @@ class RssSourceConnectorIntegrationTest {
                     return consumerRecords.size() == 2;
                 });
         consumerRecords.sort(Comparator.comparing(c -> ((String) c.value())));
-        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/multiple-requests/output-2-1.json"));
-        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/multiple-requests/output-2-2.json"));
+        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/output-2-1.json"));
+        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-2-2.json"));
+    }
+
+    @Test
+    void storesOffsetsAndUsesThemToGetInformationAboutPreviouslyPolledMessages() throws Exception {
+        String offsetsFilename = "target/" + UUID.randomUUID().toString();
+        standaloneKafkaConnect = new StandaloneKafkaConnect(offsetsFilename, 2, URLS);
+        standaloneKafkaConnect.start();
+
+        Consumer<String, String> consumer = createConsumer();
+        List<ConsumerRecord> consumerRecords = new ArrayList<>();
+        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+                .until(() -> {
+                    consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
+                    return consumerRecords.size() == 4;
+                });
+        consumerRecords.clear();
+        standaloneKafkaConnect.stop();
+        assertThat(new File(offsetsFilename)).exists();
+
+        wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/input-2.atom"))));
+        wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/input-2.rss"))));
+
+        standaloneKafkaConnect.start();
+
+        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+                .until(() -> {
+                    consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
+                    return consumerRecords.size() == 2;
+                });
+        consumerRecords.sort(Comparator.comparing(c -> ((String) c.value())));
+        assertThatJson(consumerRecords.get(0).value()).isEqualTo(read("integration-test/output-2-1.json"));
+        assertThatJson(consumerRecords.get(1).value()).isEqualTo(read("integration-test/output-2-2.json"));
     }
 
     private static Consumer<String, String> createConsumer() {
