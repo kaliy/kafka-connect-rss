@@ -9,7 +9,7 @@ All code snippets and line numbers are based on 2.1.1 version of kafka.
 Kafka Connect doesn't allow you to store objects (even Serializable ones) or collections in offsets (`OffsetUtils#49`) but it allows you to store huge strings and byte arrays there. So objects can be stored as a byte[] or ByteBuffer representation or as a base64 string.
 
 Producer has following configuration by default (`Worker#135` and then `Worker#501`):
-~~~~
+```java
         // These settings are designed to ensure there is no data loss. They *may* be overridden via configs passed to the
         // worker, but this may compromise the delivery guarantees of Kafka Connect.
         producerProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, Integer.toString(Integer.MAX_VALUE));
@@ -17,7 +17,7 @@ Producer has following configuration by default (`Worker#135` and then `Worker#5
         producerProps.put(ProducerConfig.ACKS_CONFIG, "all");
         producerProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1");
         producerProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, Integer.toString(Integer.MAX_VALUE));
-~~~~
+```
 
 Offsets are being committed:
 - by `SourceTaskOffsetsCommitter` every 1 minute (default value, can be changed with `offset.flush.interval.ms` property) - started by `Worker#470` 
@@ -38,7 +38,7 @@ It is definitely a problem for a standalone mode but I'm not really sure it's a 
 
 I've decided that having CountDownLatch and count it down in the stop() method should be good enough. Although I can look further for better a way to pause the thread. WorkerSourceTask.execute() has following code:
 
-~~~~
+```java
             while (!isStopping()) {
                 if (shouldPause()) {
                     onPause();
@@ -49,10 +49,11 @@ I've decided that having CountDownLatch and count it down in the stop() method s
                 }
                 ...
             }
-~~~~ 
+``` 
 shouldPause() is checking for `this.targetState == TargetState.PAUSED`, maybe I can utilize it somehow if that's not internal kafka connect functionality.
 
 I've checked some public projects for their ways of waiting:
+
 - kafka-connect-jdbc uses `org.apache.kafka.common.utils.Time` which uses Thread.sleep() underneath but wraps the InterruptedException to interrupt the current thread (`SystemTime#36`)
 - kafka-connect-github-source uses Thread.sleep()
 - kafka-connect-irc has no waiting whatsoever :)
@@ -65,16 +66,19 @@ When we read a feed again, some or all of the items there may be already process
   - \- depends on the implementation and may break and resend messages after updating ROME library
   - \- will resend the message even if some minor field that is not present in output message has been changed
   - \- offsets may be huge (that's not really a problem though - see Offsets and message sending section of this document)
+
 - store list of IDs (which is id in Atom and _(it's complicated as no field is mandatory in RSS)_ in RSS)
   - \+ offsets are compact
   - \+/- it's tricky to extract ID from RSS feeds as no element in `<item>` is mandatory.
   - \- if the item will be updated, we won't send a new message
+
 - serialize the output `Struct` objects:
   - \+ we can send new messages with updates and we won't send duplicates if some of the fields than are not present in schema were updated
   - \+ offsets are much more compact comparing to option #1 and still not that big to store
   - \- we don't need to store schema and the only easy way to get the `Struct.values` is to call `Struct.toString()` which is not guaranteed to be the same in future versions of kafka connect
   - \- in case of changing the schema all messages will be resent
   - \- some users may not want to get updates
+
 - serialize RssData object
   - \+/- the same pros and cons as in option #3 but we don't need to rely on toString implementation and write our own serialization
   - \+ if we want, we can even support schema upgrades and we won't resend messages that were already sent but with previous schema
