@@ -1,0 +1,2 @@
+# kafka-connect-rss
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6c2be21719ba4d198c59e263ca205ec6)](https://app.codacy.com/app/kaliy/kafka-connect-rss?utm_source=github.com&utm_medium=referral&utm_content=kaliy/kafka-connect-rss&utm_campaign=Badge_Grade_Dashboard)
