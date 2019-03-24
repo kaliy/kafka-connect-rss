@@ -118,9 +118,6 @@ public class Item {
         private String offset;
         private Feed feed;
 
-        public Builder() {
-        }
-
         public static Builder anItem() {
             return new Builder();
         }

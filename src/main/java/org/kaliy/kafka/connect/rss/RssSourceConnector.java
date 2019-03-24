@@ -20,14 +20,17 @@ public class RssSourceConnector extends SourceConnector {
     private RssSourceConnectorConfig rssSourceConnectorConfig;
     private Logger logger = LoggerFactory.getLogger(RssSourceConnector.class);
 
+    @Override
     public void start(Map<String, String> props) {
         rssSourceConnectorConfig = new RssSourceConnectorConfig(props);
     }
 
+    @Override
     public Class<? extends Task> taskClass() {
         return RssSourceTask.class;
     }
 
+    @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         List<String> urls = rssSourceConnectorConfig.getUrls();
         if (maxTasks > urls.size()) {
@@ -45,13 +48,17 @@ public class RssSourceConnector extends SourceConnector {
                 }).collect(Collectors.toList());
     }
 
+    @Override
     public void stop() {
+        // No resources to release, nothing to do here
     }
 
+    @Override
     public ConfigDef config() {
         return RssSourceConnectorConfig.config();
     }
 
+    @Override
     public String version() {
         return VERSION;
     }

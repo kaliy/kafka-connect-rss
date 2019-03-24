@@ -385,8 +385,4 @@ class FeedProviderTest {
         syndPerson.setName(name);
         return syndPerson;
     }
-
-    private URL url(String file) {
-        return FeedProviderTest.class.getClassLoader().getResource(file);
-    }
 }
