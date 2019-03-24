@@ -4,9 +4,9 @@ Kafka Connect RSS and Atom Source Connector.
 
 [![Build Status](https://travis-ci.com/kaliy/kafka-connect-rss.svg?branch=master)](https://travis-ci.com/kaliy/kafka-connect-rss)
 [![codecov](https://codecov.io/gh/kaliy/kafka-connect-rss/branch/master/graph/badge.svg)](https://codecov.io/gh/kaliy/kafka-connect-rss)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.kaliy.kafka/kafka-connect-rss/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.kaliy.kafka/kafka-connect-rss)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d3a79e9f6e6a4d4db840799e858b0ed7)](https://www.codacy.com/app/kaliy/kafka-connect-rss)
 [![Known Vulnerabilities](https://snyk.io/test/github/kaliy/daily-coding-problem/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/kaliy/daily-coding-problem?targetFile=pom.xml)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkaliy%2Fkafka-connect-rss.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkaliy%2Fkafka-connect-rss?ref=badge_shield)
 
 ## Configuration
 
