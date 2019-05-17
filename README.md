@@ -10,7 +10,7 @@ Kafka Connect RSS and Atom Source Connector.
 
 ## Configuration
 
-Connector supports polling multiple URLs and sending output to a single topic. Sample configuration file can be found in the repository [here](https://github.com/kaliy/kafka-connect-rss/blob/master/config/rss-source-connect-sample.properties).
+Connector supports polling multiple URLs and sending output to a single topic. Sample configuration file can be found in the repository [here](https://github.com/kaliy/kafka-connect-rss/blob/master/config/rss-source-connector-sample.properties).
 
 URLs should be percent encoded and separated by space. Tasks will be split evenly, e.g. for 5 URLs and 3 `tasks.max` there will be 3 tasks created with 2, 2 and 1 URLs each. 
 If `tasks.max` is higher than provided number of URLs, only the necessary number of tasks will be created with 1 URL each.
