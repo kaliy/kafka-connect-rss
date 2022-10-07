@@ -1,9 +1,6 @@
 package org.kaliy.kafka.connect.rss;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -16,7 +13,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +64,7 @@ class RssSourceConnectorIntegrationTest {
 
         Consumer<String, String> consumer = createConsumer();
         List<ConsumerRecord> consumerRecords = new ArrayList<>();
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 4;
@@ -78,13 +78,13 @@ class RssSourceConnectorIntegrationTest {
 
     @Test
     void pollsMultipleUrlsFromASingleTask() throws IOException {
-        String offsetsFilename = "target/" + UUID.randomUUID().toString();
+        String offsetsFilename = "target/" + UUID.randomUUID();
         standaloneKafkaConnect = new StandaloneKafkaConnect(offsetsFilename, 1, URLS);
         standaloneKafkaConnect.start();
 
         Consumer<String, String> consumer = createConsumer();
         List<ConsumerRecord> consumerRecords = new ArrayList<>();
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 4;
@@ -102,7 +102,7 @@ class RssSourceConnectorIntegrationTest {
 
         Consumer<String, String> consumer = createConsumer();
         List<ConsumerRecord> consumerRecords = new ArrayList<>();
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 4;
@@ -117,7 +117,7 @@ class RssSourceConnectorIntegrationTest {
 
         Consumer<String, String> consumer = createConsumer();
         List<ConsumerRecord> consumerRecords = new ArrayList<>();
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 4;
@@ -127,7 +127,7 @@ class RssSourceConnectorIntegrationTest {
         wireMockServer.stubFor(get("/feed.atom").willReturn(aResponse().withBody(read("integration-test/input-2.atom"))));
         wireMockServer.stubFor(get("/feed.rss").willReturn(aResponse().withBody(read("integration-test/input-2.rss"))));
 
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 2;
@@ -145,7 +145,7 @@ class RssSourceConnectorIntegrationTest {
 
         Consumer<String, String> consumer = createConsumer();
         List<ConsumerRecord> consumerRecords = new ArrayList<>();
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 4;
@@ -159,7 +159,7 @@ class RssSourceConnectorIntegrationTest {
 
         standaloneKafkaConnect.start();
 
-        await().atMost(org.awaitility.Duration.ONE_MINUTE)
+        await().atMost(Duration.ofMinutes(1))
                 .until(() -> {
                     consumer.poll(Duration.ofSeconds(1)).iterator().forEachRemaining(consumerRecords::add);
                     return consumerRecords.size() == 2;
@@ -180,8 +180,12 @@ class RssSourceConnectorIntegrationTest {
         return consumer;
     }
 
-    private static String read(String file) throws IOException {
-        URL url = Resources.getResource(file);
-        return Resources.toString(url, Charsets.UTF_8);
+    private static String read(String file) {
+        try {
+            Path path = Paths.get(RssSourceConnectorIntegrationTest.class.getResource(file).toURI());
+            return new String(Files.readAllBytes(path));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

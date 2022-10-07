@@ -52,7 +52,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getFeed().getTitle()).hasValue("Pikachu"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getFeed().getTitle()).hasValue("Pikachu"));
     }
 
     @Test
@@ -61,7 +61,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getFeed().getTitle()).isEmpty());
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getFeed().getTitle()).isEmpty());
     }
 
     @Test
@@ -74,7 +74,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider.getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getFeed().getUrl()).isEqualTo("http://naruto.uzumaki"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getFeed().getUrl()).isEqualTo("http://naruto.uzumaki"));
     }
 
     @Test
@@ -83,7 +83,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo("Sasuke"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getTitle()).isEqualTo("Sasuke"));
     }
 
     @Test
@@ -92,7 +92,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getTitle()).isEqualTo(null));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getTitle()).isEqualTo(null));
     }
 
     @Test
@@ -102,7 +102,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Raichu FTW!"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getLink()).isEqualTo("Raichu FTW!"));
     }
 
     @Test
@@ -112,7 +112,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo(null));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getLink()).isEqualTo(null));
     }
 
     @Test
@@ -122,7 +122,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Leonardo"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getLink()).isEqualTo("Leonardo"));
     }
 
     @Test
@@ -132,7 +132,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getLink()).isEqualTo("Raphael"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getLink()).isEqualTo("Raphael"));
     }
 
     @Test
@@ -141,7 +141,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isEqualTo("Junpei"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getId()).isEqualTo("Junpei"));
     }
 
     @Test
@@ -150,7 +150,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getId()).isNull());
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getId()).isNull());
     }
 
     @Test
@@ -159,7 +159,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).hasValue("I like to move it move it!"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getContent()).hasValue("I like to move it move it!"));
     }
 
     @Test
@@ -168,7 +168,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getContent()).isEmpty());
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getContent()).isEmpty());
     }
 
     @Test
@@ -180,7 +180,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Seven, Junpei"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getAuthor()).hasValue("Seven, Junpei"));
     }
 
     @Test
@@ -192,7 +192,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Snake"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getAuthor()).hasValue("Snake"));
     }
 
     @Test
@@ -204,7 +204,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Santa, Lotus"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getAuthor()).hasValue("Santa, Lotus"));
     }
 
     @Test
@@ -216,7 +216,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).hasValue("Clover"));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getAuthor()).hasValue("Clover"));
     }
 
     @Test
@@ -228,7 +228,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getAuthor()).isEmpty());
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getAuthor()).isEmpty());
     }
 
     @Test
@@ -238,7 +238,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2000-01-01T10:00:01Z")));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getDate()).hasValue(Instant.parse("2000-01-01T10:00:01Z")));
     }
 
     @Test
@@ -248,7 +248,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).hasValue(Instant.parse("2010-11-11T20:00:02Z")));
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getDate()).hasValue(Instant.parse("2010-11-11T20:00:02Z")));
     }
 
     @Test
@@ -258,7 +258,7 @@ class FeedProviderTest {
 
         List<Item> items = feedProvider(syndFeed).getNewEvents(Collections.emptyList());
 
-        assertThat(items).hasOnlyOneElementSatisfying(item -> assertThat(item.getDate()).isEmpty());
+        assertThat(items).singleElement().satisfies(item -> assertThat(item.getDate()).isEmpty());
     }
 
     @Test
