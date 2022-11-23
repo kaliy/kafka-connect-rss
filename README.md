@@ -25,7 +25,7 @@ Connector has following configuration options:
 
 ## Output
 
-Message has following schema:
+Message has the following schema:
 
 ```json
 {
@@ -104,6 +104,10 @@ Sample message with JSON converter without embedded schema:
   "date": "2019-03-22T13:34:17Z"
 }
 ```
+
+## Changelog
+* 0.1.0 (2019-03-24): Initial release
+* 0.1.1 (2022-10-07): Address known vulnerabilities by upgrading dependencies.
 
 ## Development
 

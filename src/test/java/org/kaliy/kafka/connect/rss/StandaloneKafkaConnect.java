@@ -1,11 +1,12 @@
 package org.kaliy.kafka.connect.rss;
 
 import org.apache.kafka.common.utils.Time;
+import org.apache.kafka.connect.connector.policy.ConnectorClientConfigOverridePolicy;
 import org.apache.kafka.connect.runtime.Connect;
 import org.apache.kafka.connect.runtime.ConnectorConfig;
 import org.apache.kafka.connect.runtime.Herder;
-import org.apache.kafka.connect.runtime.HerderProvider;
 import org.apache.kafka.connect.runtime.Worker;
+import org.apache.kafka.connect.runtime.WorkerConfig;
 import org.apache.kafka.connect.runtime.isolation.Plugins;
 import org.apache.kafka.connect.runtime.rest.RestServer;
 import org.apache.kafka.connect.runtime.rest.entities.ConnectorInfo;
@@ -56,22 +57,24 @@ public class StandaloneKafkaConnect {
             String kafkaClusterId = ConnectUtils.lookupKafkaClusterId(config);
 
             RestServer rest = new RestServer(config);
-            HerderProvider provider = new HerderProvider();
-            rest.start(provider, plugins);
+            rest.initializeServer();
 
             URI advertisedUrl = rest.advertisedUrl();
             String workerId = advertisedUrl.getHost() + ":" + advertisedUrl.getPort();
 
-            Worker worker = new Worker(workerId, Time.SYSTEM, plugins, config, new FileOffsetBackingStore());
+            ConnectorClientConfigOverridePolicy connectorClientConfigOverridePolicy = plugins.newPlugin(
+                    config.getString(WorkerConfig.CONNECTOR_CLIENT_POLICY_CLASS_CONFIG),
+                    config, ConnectorClientConfigOverridePolicy.class
+            );
+            Worker worker = new Worker(workerId, Time.SYSTEM, plugins, config, new FileOffsetBackingStore(), connectorClientConfigOverridePolicy);
 
-            Herder herder = new StandaloneHerder(worker, kafkaClusterId);
+            Herder herder = new StandaloneHerder(worker, kafkaClusterId, connectorClientConfigOverridePolicy);
             final Connect connect = new Connect(herder, rest);
 
             logger.info("Kafka Connect standalone worker has been initialized");
 
             try {
                 connect.start();
-                provider.setHerder(herder);
                 Map<String, String> connectorProps = connectorProps();
                 FutureCallback<Herder.Created<ConnectorInfo>> cb = new FutureCallback<>((error, info) -> {
                     if (error != null) {
