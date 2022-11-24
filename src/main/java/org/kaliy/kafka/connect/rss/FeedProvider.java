@@ -81,9 +81,9 @@ public class FeedProvider {
         return allItems.stream()
                 .filter(item -> !sentItems.contains(item.toBase64()))
                 .map(item -> itemBuilderFactory.get()
-                                .withItem(item)
-                                .withOffset(joiner.add(item.toBase64()).toString())
-                                .build()
+                            .withItem(item)
+                            .withOffset(joiner.add(item.toBase64()).toString())
+                            .build()
                 ).collect(Collectors.toList());
     }
 

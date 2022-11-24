@@ -38,11 +38,13 @@ public class StandaloneKafkaConnect {
     private final String offsetsFilename;
     private final int maxTasks;
     private final String urls;
+    private final String bootstrapServer;
 
-    public StandaloneKafkaConnect(String offsetsFilename, int maxTasks, String urls) {
+    public StandaloneKafkaConnect(String offsetsFilename, int maxTasks, String urls, String bootstrapServer) {
         this.offsetsFilename = offsetsFilename;
         this.maxTasks = maxTasks;
         this.urls = urls;
+        this.bootstrapServer = bootstrapServer;
     }
 
     public void start() {
@@ -124,7 +126,7 @@ public class StandaloneKafkaConnect {
 
     private Map<String, String> workerProps() {
         Map<String, String> workerProps = new HashMap<>();
-        workerProps.put("bootstrap.servers", "localhost:9092");
+        workerProps.put("bootstrap.servers", bootstrapServer);
         workerProps.put("key.converter", "org.apache.kafka.connect.json.JsonConverter");
         workerProps.put("key.converter.schemas.enable", "true");
         workerProps.put("value.converter", "org.apache.kafka.connect.json.JsonConverter");
