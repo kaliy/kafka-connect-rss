@@ -2,6 +2,8 @@ package org.kaliy.kafka.connect.rss.config;
 
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -47,5 +49,14 @@ class UrlListValidatorTest {
     void allowsLocalhostUrls() {
         assertThatCode(() -> urlListValidator.ensureValid("rss.urls", "http://localhost:8888/feed.atom"))
                 .doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void throwsExceptionWhenNullIsPassed(String value) {
+        assertThatExceptionOfType(ConfigException.class)
+                .isThrownBy(() -> urlListValidator.ensureValid("rss.urls", value))
+                .withMessage("Invalid value " + value + " for configuration rss.urls: No URLs found");
+
     }
 }
