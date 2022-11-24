@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.kaliy.kafka</groupId>
@@ -25,10 +26,10 @@
 
     <scm>
         <url>https://github.com/kaliy/kafka-connect-rss</url>
-        <connection>scm:git:https://github.com/kaliy/kafka-connect-rss.git</connection>
-        <developerConnection>scm:git:https://github.com/kaliy/kafka-connect-rss.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <connection>scm:git:ssh://git@github.com/kaliy/kafka-connect-rss.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/kaliy/kafka-connect-rss.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -296,7 +297,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -322,7 +323,8 @@
                                 </goals>
                                 <configuration>
                                     <title>Kafka Connect RSS Source</title>
-                                    <documentationUrl>https://github.com/kaliy/kafka-connect-rss/blob/master/README.md</documentationUrl>
+                                    <documentationUrl>https://github.com/kaliy/kafka-connect-rss/blob/master/README.md
+                                    </documentationUrl>
                                     <description>
                                         Kafka RSS source connector allows moving data from RSS and Atom feeds to kafka.
                                         It continuously polling feeds on the given URLs and sends new items to kafka.
