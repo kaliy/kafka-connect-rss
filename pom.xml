@@ -4,7 +4,7 @@
 
     <groupId>org.kaliy.kafka</groupId>
     <artifactId>kafka-connect-rss</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <url>https://github.com/kaliy/kafka-connect-rss</url>
@@ -27,7 +27,7 @@
         <url>https://github.com/kaliy/kafka-connect-rss</url>
         <connection>scm:git:ssh://git@github.com/kaliy/kafka-connect-rss.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/kaliy/kafka-connect-rss.git</developerConnection>
-        <tag>kafka-connect-rss-0.1.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
