@@ -79,9 +79,9 @@ public class RssSourceTask extends SourceTask {
     }
 
     private List<SourceRecord> poll(String url, FeedProvider feedProvider) {
-        logger.debug("Polling for new messages from {}", url);
+        logger.info("Polling for new messages from {}", url);
         List<Item> newItems = feedProvider.getNewEvents(previouslySentItems.get(url));
-        logger.debug("Got {} new items from {}", newItems.size(), url);
+        logger.info("Got {} new items from {}", newItems.size(), url);
         if (!newItems.isEmpty()) {
             previouslySentItems.put(url, new HashSet<>(Arrays.asList(
                     newItems.get(newItems.size() - 1).getOffset().split(OFFSET_DELIMITER_REGEX)))

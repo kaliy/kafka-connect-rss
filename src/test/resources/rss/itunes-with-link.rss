@@ -1,0 +1,110 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+    <channel>
+        <atom:link href="https://feeds.simplecast.com/54nAGcIl" rel="self" title="MP3 Audio"
+                   type="application/atom+xml"/>
+        <atom:link xmlns="http://www.w3.org/2005/Atom" href="https://simplecast.superfeedr.com/" rel="hub"/>
+        <generator>https://simplecast.com</generator>
+        <title>The Daily</title>
+        <description>This is what the news should sound like. The biggest stories of our time, told by the best
+            journalists in the world. Hosted by Michael Barbaro and Sabrina Tavernise. Twenty minutes a day, five days a
+            week, ready by 6 a.m.
+        </description>
+        <copyright>© 2020-2021 THE NEW YORK TIMES COMPANY; The New York Times encourages the use of RSS feeds for
+            personal use in a news reader or as part of a non-commercial blog, subject to your agreement to our Terms of
+            Service.
+        </copyright>
+        <language>en</language>
+        <pubDate>Mon, 28 Nov 2022 10:45:00 +0000</pubDate>
+        <lastBuildDate>Mon, 28 Nov 2022 11:46:27 +0000</lastBuildDate>
+        <image>
+            <link>https://www.nytimes.com/the-daily</link>
+            <title>The Daily</title>
+            <url>
+                https://image.simplecastcdn.com/images/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/2cce5659-f647-4366-b318-46e4b67afcfa/3000x3000/c81936f538106550b804e7e4fe2c236319bab7fba37941a6e8f7e5c3d3048b88fc5b2182fb790f7d446bdc820406456c94287f245db89d8656c105d5511ec3de.jpeg?aid=rss_feed
+            </url>
+        </image>
+        <link>https://www.nytimes.com/the-daily</link>
+        <itunes:type>episodic</itunes:type>
+        <itunes:summary>This is what the news should sound like. The biggest stories of our time, told by the best
+            journalists in the world. Hosted by Michael Barbaro and Sabrina Tavernise. Twenty minutes a day, five days a
+            week, ready by 6 a.m.
+        </itunes:summary>
+        <itunes:author>The New York Times</itunes:author>
+        <itunes:explicit>no</itunes:explicit>
+        <itunes:image
+                href="https://image.simplecastcdn.com/images/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/2cce5659-f647-4366-b318-46e4b67afcfa/3000x3000/c81936f538106550b804e7e4fe2c236319bab7fba37941a6e8f7e5c3d3048b88fc5b2182fb790f7d446bdc820406456c94287f245db89d8656c105d5511ec3de.jpeg?aid=rss_feed"/>
+        <itunes:new-feed-url>https://feeds.simplecast.com/54nAGcIl</itunes:new-feed-url>
+        <itunes:owner>
+            <itunes:name>The New York Times</itunes:name>
+            <itunes:email>thedaily@nytimes.com</itunes:email>
+        </itunes:owner>
+        <itunes:category text="News">
+            <itunes:category text="Daily News"/>
+        </itunes:category>
+        <item>
+            <guid isPermaLink="false">dfc1e70e-22d0-4c34-8cd4-5170a4f2667a</guid>
+            <title>Qatar’s Big Bet on the World Cup</title>
+            <description>
+                <![CDATA[ <p>The World Cup, the biggest single sporting event on the planet, began earlier this month. By the time the tournament finishes, half the global population is expected to have watched. </p><p>The 2022 World Cup has also been the focus of over a decade of controversy because of its unlikely host: the tiny, energy-rich country of Qatar. </p><p>How did such a small nation come to host the tournament, and at what cost?</p><p>Guest: <a href="https://www.nytimes.com/by/tariq-panja?smid=pc-thedaily">Tariq Panja</a>, a sports business reporter for The New York Times.</p><p>Background reading: </p><ul><li>The decision to take the World Cup to Qatar has upturned a small nation, battered the reputation of global soccer’s governing body and <a href="https://www.nytimes.com/2022/11/19/sports/soccer/world-cup-qatar-2022.html?smid=pc-thedaily">altered the fabric of the sport</a>.</li><li>Many in Qatar say the barrage of criticism about its human rights record and the exploitation of migrant workers is <a href="https://www.nytimes.com/2022/11/25/world/middleeast/qatar-world-cup-criticism.html?smid=pc-thedaily">laced with discrimination and hypocrisy</a>.</li></ul><p>For more information on today’s episode, visit <a href="http://nytimes.com/thedaily?smid=pc-thedaily">nytimes.com/thedaily</a>. Transcripts of each episode will be made available by the next workday. </p> ]]>
+            </description>
+            <pubDate>Mon, 28 Nov 2022 10:45:00 +0000</pubDate>
+            <author>thedaily@nytimes.com (The New York Times)</author>
+            <link>https://www.nytimes.com/the-daily</link>
+            <content:encoded>
+                <![CDATA[ <p>The World Cup, the biggest single sporting event on the planet, began earlier this month. By the time the tournament finishes, half the global population is expected to have watched. </p><p>The 2022 World Cup has also been the focus of over a decade of controversy because of its unlikely host: the tiny, energy-rich country of Qatar. </p><p>How did such a small nation come to host the tournament, and at what cost?</p><p>Guest: <a href="https://www.nytimes.com/by/tariq-panja?smid=pc-thedaily">Tariq Panja</a>, a sports business reporter for The New York Times.</p><p>Background reading: </p><ul><li>The decision to take the World Cup to Qatar has upturned a small nation, battered the reputation of global soccer’s governing body and <a href="https://www.nytimes.com/2022/11/19/sports/soccer/world-cup-qatar-2022.html?smid=pc-thedaily">altered the fabric of the sport</a>.</li><li>Many in Qatar say the barrage of criticism about its human rights record and the exploitation of migrant workers is <a href="https://www.nytimes.com/2022/11/25/world/middleeast/qatar-world-cup-criticism.html?smid=pc-thedaily">laced with discrimination and hypocrisy</a>.</li></ul><p>For more information on today’s episode, visit <a href="http://nytimes.com/thedaily?smid=pc-thedaily">nytimes.com/thedaily</a>. Transcripts of each episode will be made available by the next workday. </p> ]]>
+            </content:encoded>
+            <enclosure length="32873216" type="audio/mpeg"
+                       url="https://dts.podtrac.com/redirect.mp3/chrt.fm/track/8DB4DB/pdst.fm/e/nyt.simplecastaudio.com/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/episodes/2fb91503-02a8-4336-a2e1-0bee7756b9b7/audio/128/default.mp3?aid=rss_feed&awCollectionId=03d8b493-87fc-4bd1-931f-8a8e9b945d8a&awEpisodeId=2fb91503-02a8-4336-a2e1-0bee7756b9b7&feed=54nAGcIl"/>
+            <itunes:title>Qatar’s Big Bet on the World Cup</itunes:title>
+            <itunes:author>The New York Times</itunes:author>
+            <itunes:duration>00:34:14</itunes:duration>
+            <itunes:summary>The World Cup, the biggest single sporting event on the planet, began earlier this month. By
+                the time the tournament finishes, half the global population is expected to have watched. The 2022 World
+                Cup has also been the focus of over a decade of controversy because of its unlikely host: the tiny,
+                energy-rich country of Qatar. How did such a small nation come to host the tournament, and at what cost?
+                Guest: Tariq Panja, a sports business reporter for The New York Times.
+            </itunes:summary>
+            <itunes:subtitle>The World Cup, the biggest single sporting event on the planet, began earlier this month.
+                By the time the tournament finishes, half the global population is expected to have watched. The 2022
+                World Cup has also been the focus of over a decade of controversy because of its unlikely host: the
+                tiny, energy-rich country of Qatar. How did such a small nation come to host the tournament, and at what
+                cost? Guest: Tariq Panja, a sports business reporter for The New York Times.
+            </itunes:subtitle>
+            <itunes:explicit>no</itunes:explicit>
+            <itunes:episodeType>full</itunes:episodeType>
+        </item>
+        <item>
+            <guid isPermaLink="false">c9dc6504-9e25-488a-9a99-c8b5d767f17f</guid>
+            <title>Talking Turkey: A Holiday Special Edition</title>
+            <description>
+                <![CDATA[ <p>Being tasked with the turkey on Thanksgiving can be a high-pressure, high-stakes job. Two Times writers share what they’ve learned.</p><p>Kim Severson takes listeners on a journey through some of the turkey-cooking gimmicks that have been recommended to Americans over the decades, and J. Kenji López-Alt talks about his foolproof method for roasting a bird.</p><p>Guest: <a href="https://www.nytimes.com/by/kim-severson">Kim Severson,</a> a food correspondent for The New York Times; and <a href="https://www.nytimes.com/by/j-kenji-lopez-alt">J. Kenji López-Alt</a>, a food columnist for The Times. </p><p>Background reading: </p><ul><li>From brining to bagging to clothing the bird in cotton, every year brings a fresh cooking trick that promises perfection.<a href="https://www.nytimes.com/2022/11/14/dining/turkey-in-a-bag-thanksgiving-cooking-gimmicks.html"> Here are the oddest and most memorable</a>.</li><li>The secret to great Thanksgiving turkey<a href="https://www.nytimes.com/2022/11/07/dining/thanksgiving-turkey-mayonnaise.html"> is already in your fridge</a>, according to J. Kenji López-Alt. </li></ul><p>For more information on today’s episode, visit <a href="http://nytimes.com/thedaily?smid=pc-thedaily">nytimes.com/thedaily</a>. Transcripts of each episode will be made available by the next workday.</p> ]]>
+            </description>
+            <pubDate>Wed, 23 Nov 2022 10:45:00 +0000</pubDate>
+            <author>thedaily@nytimes.com (The New York Times)</author>
+            <link>https://www.nytimes.com/the-daily</link>
+            <content:encoded>
+                <![CDATA[ <p>Being tasked with the turkey on Thanksgiving can be a high-pressure, high-stakes job. Two Times writers share what they’ve learned.</p><p>Kim Severson takes listeners on a journey through some of the turkey-cooking gimmicks that have been recommended to Americans over the decades, and J. Kenji López-Alt talks about his foolproof method for roasting a bird.</p><p>Guest: <a href="https://www.nytimes.com/by/kim-severson">Kim Severson,</a> a food correspondent for The New York Times; and <a href="https://www.nytimes.com/by/j-kenji-lopez-alt">J. Kenji López-Alt</a>, a food columnist for The Times. </p><p>Background reading: </p><ul><li>From brining to bagging to clothing the bird in cotton, every year brings a fresh cooking trick that promises perfection.<a href="https://www.nytimes.com/2022/11/14/dining/turkey-in-a-bag-thanksgiving-cooking-gimmicks.html"> Here are the oddest and most memorable</a>.</li><li>The secret to great Thanksgiving turkey<a href="https://www.nytimes.com/2022/11/07/dining/thanksgiving-turkey-mayonnaise.html"> is already in your fridge</a>, according to J. Kenji López-Alt. </li></ul><p>For more information on today’s episode, visit <a href="http://nytimes.com/thedaily?smid=pc-thedaily">nytimes.com/thedaily</a>. Transcripts of each episode will be made available by the next workday.</p> ]]>
+            </content:encoded>
+            <enclosure length="26354175" type="audio/mpeg"
+                       url="https://dts.podtrac.com/redirect.mp3/chrt.fm/track/8DB4DB/pdst.fm/e/nyt.simplecastaudio.com/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/episodes/aaf24796-0882-46f3-bc4a-4458a692d5e8/audio/128/default.mp3?aid=rss_feed&awCollectionId=03d8b493-87fc-4bd1-931f-8a8e9b945d8a&awEpisodeId=aaf24796-0882-46f3-bc4a-4458a692d5e8&feed=54nAGcIl"/>
+            <itunes:title>Talking Turkey: A Holiday Special Edition</itunes:title>
+            <itunes:author>The New York Times</itunes:author>
+            <itunes:duration>00:27:27</itunes:duration>
+            <itunes:summary>Being tasked with the turkey on Thanksgiving can be a high-pressure, high-stakes job. Two
+                Times writers share what they’ve learned. Kim Severson takes listeners on a journey through some of the
+                turkey-cooking gimmicks that have been recommended to Americans over the decades, and J. Kenji López-Alt
+                talks about his foolproof method for roasting a bird. Guest: Kim Severson, a food correspondent for The
+                New York Times; and J. Kenji López-Alt, a food columnist for The Times.
+            </itunes:summary>
+            <itunes:subtitle>Being tasked with the turkey on Thanksgiving can be a high-pressure, high-stakes job. Two
+                Times writers share what they’ve learned. Kim Severson takes listeners on a journey through some of the
+                turkey-cooking gimmicks that have been recommended to Americans over the decades, and J. Kenji López-Alt
+                talks about his foolproof method for roasting a bird. Guest: Kim Severson, a food correspondent for The
+                New York Times; and J. Kenji López-Alt, a food columnist for The Times.
+            </itunes:subtitle>
+            <itunes:explicit>no</itunes:explicit>
+            <itunes:episodeType>full</itunes:episodeType>
+        </item>
+    </channel>
+</rss>
