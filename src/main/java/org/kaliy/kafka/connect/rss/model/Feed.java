@@ -20,6 +20,14 @@ public class Feed {
         return url;
     }
 
+    @Override
+    public String toString() {
+        return "Feed{" +
+                "url='" + url + '\'' +
+                ", title='" + title + '\'' +
+                '}';
+    }
+
     public static final class Builder {
         private String url;
         private String title;

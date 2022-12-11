@@ -1,5 +1,6 @@
 package org.kaliy.kafka.connect.rss;
 
+import com.rometools.rome.feed.synd.SyndEnclosure;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndPerson;
@@ -23,6 +24,7 @@ import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kaliy.kafka.connect.rss.config.RssSourceConnectorConfig.OFFSET_DELIMITER;
 
@@ -57,9 +59,8 @@ public class FeedProvider {
         SyndFeed syndFeed = maybeFeed.get();
 
         String feedTitle = trim(syndFeed.getTitle());
-        String feedUrl = url;
 
-        Feed feed = feedBuilderFactory.get().withUrl(feedUrl).withTitle(feedTitle).build();
+        Feed feed = feedBuilderFactory.get().withUrl(url).withTitle(feedTitle).build();
 
         List<Item> allItems = syndFeed.getEntries().stream().map(entry ->
                 itemBuilderFactory.get()
@@ -81,22 +82,44 @@ public class FeedProvider {
         return allItems.stream()
                 .filter(item -> !sentItems.contains(item.toBase64()))
                 .map(item -> itemBuilderFactory.get()
-                            .withItem(item)
-                            .withOffset(joiner.add(item.toBase64()).toString())
-                            .build()
+                                .withItem(item)
+                                .withOffset(joiner.add(item.toBase64()).toString())
+                                .build()
                 ).collect(Collectors.toList());
     }
 
     private String link(SyndEntry entry) {
+        // should be replaced with Optional.or() when java 8 will be finally unsupported by confluent platform
+        Stream<Supplier<Optional<String>>> extractors = Stream.of(
+                () -> extractLinkFromEnclosures(entry),
+                () -> extractLinkFromLink(entry),
+                () -> extractLinkFromLinks(entry)
+        );
+        return extractors.map(Supplier::get)
+                .flatMap(maybeString -> maybeString.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Optional<String> extractLinkFromEnclosures(SyndEntry entry) {
+        return entry.getEnclosures().stream()
+                .map(SyndEnclosure::getUrl)
+                .findFirst();
+    }
+
+    private static Optional<String> extractLinkFromLink(SyndEntry entry) {
         String entryLink = entry.getLink();
         if (!Strings.isBlank(entryLink)) {
-            return entryLink.trim();
+            return Optional.of(entryLink.trim());
         }
+        return Optional.empty();
+    }
+
+    private static Optional<String> extractLinkFromLinks(SyndEntry entry) {
         return entry.getLinks().stream() // although documentation says this method returns null, it actually returns empty list
                 .filter(link -> !Strings.isBlank(link.getHref()))
                 .findFirst()
-                .map(link -> link.getHref().trim())
-                .orElse(null);
+                .map(link -> link.getHref().trim());
     }
 
     private String author(SyndEntry entry, SyndFeed feed) {

@@ -109,6 +109,8 @@ Sample message with JSON converter without embedded schema:
 * 0.1.1 (2022-11-24):
   * Address known vulnerabilities by upgrading dependencies ([#6](https://github.com/kaliy/kafka-connect-rss/pull/6))
   * Handle Null Pointer Exception in the confluent control center ([#8](https://github.com/kaliy/kafka-connect-rss/pull/8))
+* 0.1.2 (2022-11-24):
+  * Support podcasts, the link is a URL to download a file. ([#11](https://github.com/kaliy/kafka-connect-rss/pull/11))
 
 ## Development
 

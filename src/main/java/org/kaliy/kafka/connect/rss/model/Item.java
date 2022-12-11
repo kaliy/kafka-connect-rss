@@ -108,6 +108,20 @@ public class Item {
         );
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "title='" + title + '\'' +
+                ", link='" + link + '\'' +
+                ", id='" + id + '\'' +
+                ", content='" + content + '\'' +
+                ", author='" + author + '\'' +
+                ", date=" + date +
+                ", offset='" + offset + '\'' +
+                ", feed=" + feed +
+                '}';
+    }
+
     public static class Builder {
         private String title;
         private String link;
